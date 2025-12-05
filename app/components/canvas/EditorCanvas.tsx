@@ -27,7 +27,7 @@ export default function EditorCanvas({
   className = '',
 }: EditorCanvasProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
-  const animationFrameRef = useRef<number>();
+  const animationFrameRef = useRef<number | null>(null);
   const [mousePos, setMousePos] = useState<Point>({ x: 0, y: 0 });
 
   const { currentTool, project } = useEditorStore();
