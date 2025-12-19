@@ -112,7 +112,7 @@ export default function GridOverlay({
         overflow: 'hidden',
       }}
     >
-      {/* Grid lines */}
+      {/* Enhanced grid lines */}
       <svg
         style={{
           position: 'absolute',
@@ -122,6 +122,7 @@ export default function GridOverlay({
           height: '100%',
         }}
       >
+        {/* Main grid lines */}
         {gridLines.map((line, i) => (
           <line
             key={i}
@@ -129,46 +130,74 @@ export default function GridOverlay({
             y1={line.y1}
             x2={line.x2}
             y2={line.y2}
-            stroke="rgba(255, 255, 255, 0.1)"
-            strokeWidth={1}
+            stroke="rgba(0, 0, 0, 0.06)"
+            strokeWidth={0.5}
+            strokeDasharray="2,4"
           />
         ))}
 
-        {/* Origin lines (0, 0) */}
+        {/* Origin lines (0, 0) with enhanced visibility */}
         {panX >= 0 && panX <= window.innerWidth && (
-          <line
-            x1={panX}
-            y1={0}
-            x2={panX}
-            y2={window.innerHeight}
-            stroke="rgba(59, 130, 246, 0.3)"
-            strokeWidth={2}
-          />
+          <>
+            <line
+              x1={panX}
+              y1={0}
+              x2={panX}
+              y2={window.innerHeight}
+              stroke="var(--primary)"
+              strokeWidth={1.5}
+              strokeDasharray="8,4"
+              opacity={0.4}
+            />
+            {/* Glow effect for origin line */}
+            <line
+              x1={panX}
+              y1={0}
+              x2={panX}
+              y2={window.innerHeight}
+              stroke="var(--primary)"
+              strokeWidth={3}
+              opacity={0.1}
+            />
+          </>
         )}
         {panY >= 0 && panY <= window.innerHeight && (
-          <line
-            x1={0}
-            y1={panY}
-            x2={window.innerWidth}
-            y2={panY}
-            stroke="rgba(59, 130, 246, 0.3)"
-            strokeWidth={2}
-          />
+          <>
+            <line
+              x1={0}
+              y1={panY}
+              x2={window.innerWidth}
+              y2={panY}
+              stroke="var(--primary)"
+              strokeWidth={1.5}
+              strokeDasharray="8,4"
+              opacity={0.4}
+            />
+            {/* Glow effect for origin line */}
+            <line
+              x1={0}
+              y1={panY}
+              x2={window.innerWidth}
+              y2={panY}
+              stroke="var(--primary)"
+              strokeWidth={3}
+              opacity={0.1}
+            />
+          </>
         )}
       </svg>
 
-      {/* Horizontal ruler */}
+      {/* Modern horizontal ruler */}
       {showRulers && (
         <div
-          className="ruler-horizontal"
+          className="backdrop-blur-sm border-b border-[var(--border-primary)]"
           style={{
             position: 'absolute',
             top: 0,
             left: 0,
             width: '100%',
-            height: 30,
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+            height: 32,
+            background: 'var(--surface-elevated)',
           }}
         >
           {rulerMarks.horizontal.map((mark, i) => (
@@ -178,20 +207,24 @@ export default function GridOverlay({
                 position: 'absolute',
                 left: mark.x,
                 top: 0,
-                height: mark.isMajor ? 30 : 20,
+                height: mark.isMajor ? 32 : 20,
                 width: 1,
-                backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                background: mark.isMajor
+                  ? 'var(--text-secondary)'
+                  : 'rgba(0, 0, 0, 0.2)',
               }}
             >
               {mark.isMajor && (
                 <span
                   style={{
                     position: 'absolute',
-                    top: 2,
-                    left: 4,
+                    top: 6,
+                    left: 6,
                     fontSize: 10,
-                    color: 'white',
+                    color: 'var(--text-secondary)',
                     whiteSpace: 'nowrap',
+                    fontWeight: '500',
+                    fontFamily: 'var(--font-mono)',
                   }}
                 >
                   {mark.label}
@@ -202,18 +235,17 @@ export default function GridOverlay({
         </div>
       )}
 
-      {/* Vertical ruler */}
+      {/* Modern vertical ruler */}
       {showRulers && (
         <div
-          className="ruler-vertical"
+          className="backdrop-blur-sm border-r border-[var(--border-primary)]"
           style={{
             position: 'absolute',
             top: 0,
             left: 0,
-            width: 30,
+            width: 32,
             height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            borderRight: '1px solid rgba(255, 255, 255, 0.2)',
+            background: 'var(--surface-elevated)',
           }}
         >
           {rulerMarks.vertical.map((mark, i) => (
@@ -223,22 +255,26 @@ export default function GridOverlay({
                 position: 'absolute',
                 top: mark.y,
                 left: 0,
-                width: mark.isMajor ? 30 : 20,
+                width: mark.isMajor ? 32 : 20,
                 height: 1,
-                backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                background: mark.isMajor
+                  ? 'var(--text-secondary)'
+                  : 'rgba(0, 0, 0, 0.2)',
               }}
             >
               {mark.isMajor && (
                 <span
                   style={{
                     position: 'absolute',
-                    top: 4,
-                    left: 2,
+                    top: 6,
+                    left: 6,
                     fontSize: 10,
-                    color: 'white',
+                    color: 'var(--text-secondary)',
                     whiteSpace: 'nowrap',
                     transform: 'rotate(-90deg)',
                     transformOrigin: 'left top',
+                    fontWeight: '500',
+                    fontFamily: 'var(--font-mono)',
                   }}
                 >
                   {mark.label}
@@ -266,50 +302,47 @@ export default function GridOverlay({
         </svg>
       )}
 
-      {/* Corner ruler intersection */}
+      {/* Modern corner ruler intersection */}
       {showRulers && (
         <div
+          className="backdrop-blur-sm border-r border-b border-[var(--border-primary)] flex items-center justify-center"
           style={{
             position: 'absolute',
             top: 0,
             left: 0,
-            width: 30,
-            height: 30,
-            backgroundColor: 'rgba(0, 0, 0, 0.9)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRight: '1px solid rgba(255, 255, 255, 0.2)',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+            width: 32,
+            height: 32,
+            background: 'var(--surface-elevated)',
           }}
         >
-          <svg width="16" height="16" viewBox="0 0 16 16">
+          <svg width="18" height="18" viewBox="0 0 16 16">
             <path
               d="M 2 2 L 2 14 L 14 14"
               fill="none"
-              stroke="rgba(255, 255, 255, 0.5)"
+              stroke="var(--text-secondary)"
               strokeWidth="1.5"
+              opacity="0.6"
             />
-            <circle cx="2" cy="2" r="2" fill="rgba(59, 130, 246, 0.5)" />
+            <circle cx="2" cy="2" r="2" fill="var(--primary)" opacity="0.7" />
+            <circle cx="2" cy="2" r="1" fill="white" />
           </svg>
         </div>
       )}
 
-      {/* Grid info */}
+      {/* Modern grid info */}
       <div
+        className="panel backdrop-blur-sm border border-[var(--border-primary)] rounded-md px-3 py-2 font-mono text-xs"
         style={{
           position: 'absolute',
-          bottom: 10,
-          right: 10,
-          backgroundColor: 'rgba(0, 0, 0, 0.7)',
-          color: 'white',
-          padding: '4px 8px',
-          borderRadius: 4,
-          fontSize: 11,
-          fontFamily: 'monospace',
+          bottom: 12,
+          right: 12,
+          background: 'var(--surface-elevated)',
+          color: 'var(--text-secondary)',
+          boxShadow: 'var(--shadow)',
         }}
       >
-        Grid: {gridSize}px
+        <span className="text-[var(--text-tertiary)]">Grid:</span>{' '}
+        <span className="text-[var(--primary)] font-semibold">{gridSize}px</span>
       </div>
     </div>
   );

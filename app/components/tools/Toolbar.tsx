@@ -65,53 +65,101 @@ export const Toolbar: React.FC<ToolbarProps> = ({ activeTool, onToolChange }) =>
   ];
 
   return (
-    <div className="bg-gray-800 border-b border-gray-700 px-4 py-2">
-      <div className="flex items-center gap-1">
+    <div className="panel-elevated border-b border-[var(--border-primary)] px-6 py-4">
+      <div className="flex items-center gap-2">
         {tools.map((tool) => (
           <div key={tool.id} className="relative group">
             <button
               onClick={() => onToolChange(tool.id)}
-              className={`p-3 rounded-lg transition-all ${
+              className={`btn p-3 rounded-lg transition-all duration-200 min-h-[44px] ${
                 activeTool === tool.id
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/50'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white'
+                  ? 'btn-primary shadow-lg scale-105'
+                  : 'btn-secondary hover:scale-105'
               }`}
               title={`${tool.label} (${tool.shortcut})`}
+              aria-label={`${tool.label} tool (shortcut: ${tool.shortcut})`}
             >
               {tool.icon}
             </button>
 
-            {/* Tooltip */}
-            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
-              <div className="font-semibold">{tool.label}</div>
-              <div className="text-xs text-gray-400">{tool.description}</div>
-              <div className="text-xs text-blue-400 mt-1">
-                Shortcut: <kbd className="px-1 py-0.5 bg-gray-800 rounded">{tool.shortcut}</kbd>
+            {/* Modern tooltip */}
+            <div
+              className="absolute top-full left-1/2 -translate-x-1/2 mt-3 px-4 py-3 text-sm rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 whitespace-nowrap z-50"
+              style={{
+                background: 'var(--surface-elevated)',
+                border: '1px solid var(--border-primary)',
+                boxShadow: 'var(--shadow-xl)',
+                transform: 'translateX(-50%) translateY(-4px)',
+              }}
+            >
+              <div className="font-semibold text-[var(--text-primary)]">{tool.label}</div>
+              <div className="text-xs text-[var(--text-secondary)] mt-1">{tool.description}</div>
+              <div className="text-xs mt-2 flex items-center gap-2">
+                <span className="text-[var(--text-tertiary)]">Shortcut:</span>
+                <kbd
+                  className="px-2 py-1 rounded font-mono text-xs"
+                  style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border-secondary)',
+                    color: 'var(--text-primary)',
+                  }}
+                >
+                  {tool.shortcut}
+                </kbd>
               </div>
               {/* Tooltip Arrow */}
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-gray-900"></div>
+              <div
+                className="absolute bottom-full left-1/2 -translate-x-1/2"
+                style={{
+                  width: 0,
+                  height: 0,
+                  borderLeft: '6px solid transparent',
+                  borderRight: '6px solid transparent',
+                  borderBottom: `6px solid var(--border-primary)`,
+                }}
+              />
             </div>
           </div>
         ))}
 
-        {/* Active Tool Indicator */}
-        <div className="ml-4 flex items-center gap-2 px-3 py-2 bg-gray-700 rounded-lg">
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-          <span className="text-sm text-gray-300">
+        {/* Modern Active Tool Indicator */}
+        <div
+          className="ml-6 flex items-center gap-3 px-4 py-2 rounded-lg backdrop-blur-sm border border-[var(--border-primary)]"
+          style={{
+            background: 'var(--surface-hover)',
+          }}
+        >
+          <div className="w-3 h-3 rounded-full animate-pulse" style={{ backgroundColor: 'var(--primary)' }}></div>
+          <span className="text-sm font-medium text-[var(--text-primary)]">
             {tools.find((t) => t.id === activeTool)?.label}
           </span>
         </div>
       </div>
 
-      {/* Keyboard Shortcuts Help */}
-      <div className="mt-2 text-xs text-gray-400 flex items-center gap-4">
-        <span>Keyboard Shortcuts:</span>
+      {/* Enhanced Keyboard Shortcuts Help */}
+      <div
+        className="mt-4 text-xs flex items-center gap-6 px-4 py-2 rounded-lg backdrop-blur-sm"
+        style={{
+          color: 'var(--text-secondary)',
+          background: 'var(--surface-hover)',
+        }}
+      >
+        <span className="font-semibold text-[var(--text-primary)]">Keyboard Shortcuts:</span>
         {tools.map((tool) => (
-          <span key={tool.id} className="flex items-center gap-1">
-            <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-gray-300">
+          <span key={tool.id} className="flex items-center gap-2">
+            <kbd
+              className="px-2 py-1 rounded font-mono"
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border-secondary)',
+                color: 'var(--text-primary)',
+                fontSize: '11px',
+                fontWeight: '500',
+              }}
+            >
               {tool.shortcut}
             </kbd>
-            <span className="text-gray-500">{tool.label}</span>
+            <span style={{ color: 'var(--text-tertiary)' }}>{tool.label}</span>
           </span>
         ))}
       </div>

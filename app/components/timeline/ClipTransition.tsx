@@ -93,39 +93,78 @@ export default function ClipTransition({
     >
       {/* Transition Indicator */}
       <div
-        className={`relative h-full w-full ${
-          position === 'start'
-            ? 'bg-gradient-to-r from-blue-500/40 to-transparent'
-            : 'bg-gradient-to-l from-blue-500/40 to-transparent'
-        } ${isDragging ? 'cursor-ew-resize' : 'cursor-pointer'} ${
-          isSelected ? 'ring-2 ring-blue-400' : ''
-        } transition-all hover:from-blue-500/60 hover:to-transparent`}
+        className={`relative h-full w-full rounded-lg overflow-hidden transition-all duration-300 group ${
+          isDragging ? 'cursor-ew-resize' : 'cursor-pointer'
+        } ${
+          isSelected ? 'ring-2 ring-[var(--accent)] ring-offset-2 ring-offset-transparent' : ''
+        } hover:scale-105`}
+        style={{
+          background: position === 'start'
+            ? 'linear-gradient(90deg, var(--accent)40 0%, transparent 100%)'
+            : 'linear-gradient(-90deg, var(--accent)40 0%, transparent 100%)',
+          boxShadow: isSelected
+            ? '0 0 12px var(--accent)40'
+            : 'var(--shadow)',
+        }}
       >
         {/* Transition Icon */}
         <div
-          className={`absolute top-1/2 -translate-y-1/2 ${
-            position === 'start' ? 'left-1' : 'right-1'
+          className={`absolute top-1/2 -translate-y-1/2 z-10 transition-all duration-300 ${
+            position === 'start' ? 'left-2' : 'right-2'
           }`}
         >
-          <div className="text-white text-xs bg-blue-600 rounded px-1 py-0.5 shadow-lg">
+          <div
+            className="text-sm rounded-md px-2 py-1 shadow-lg transition-all duration-300 group-hover:scale-110"
+            style={{
+              background: 'var(--accent)',
+              color: 'var(--text-inverse)',
+              boxShadow: '0 2px 8px var(--accent)40',
+            }}
+          >
             {metadata.icon}
           </div>
         </div>
 
         {/* Duration Handle */}
         <div
-          className={`absolute top-0 bottom-0 w-1 bg-blue-500 hover:bg-blue-400 cursor-ew-resize ${
+          className={`absolute top-0 bottom-0 w-2 cursor-ew-resize transition-all duration-200 ${
             position === 'start' ? 'right-0' : 'left-0'
-          } ${isDragging ? 'bg-blue-400' : ''}`}
+          } ${isDragging ? 'opacity-100' : 'opacity-60 group-hover:opacity-100'}`}
+          style={{
+            background: isDragging ? 'var(--accent)' : 'var(--accent)60',
+          }}
           onMouseDown={handleMouseDown}
         >
           {/* Handle Grip */}
           <div className="absolute top-1/2 -translate-y-1/2 w-full h-8 flex items-center justify-center">
-            <div className="w-0.5 h-4 bg-white/50 rounded" />
+            <div className="flex flex-col gap-1">
+              <div
+                className="w-0.5 h-3 rounded-full transition-all duration-200"
+                style={{
+                  background: 'var(--text-inverse)',
+                  opacity: isDragging ? 1 : 0.6,
+                }}
+              />
+              <div
+                className="w-0.5 h-3 rounded-full transition-all duration-200"
+                style={{
+                  background: 'var(--text-inverse)',
+                  opacity: isDragging ? 1 : 0.6,
+                }}
+              />
+            </div>
           </div>
+
+          {/* Handle hover indicator */}
+          <div
+            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            style={{
+              background: 'var(--accent)',
+            }}
+          />
         </div>
 
-        {/* Diagonal Stripes Pattern */}
+        {/* Modern Diagonal Stripes Pattern */}
         <svg
           className="absolute inset-0 w-full h-full opacity-20 pointer-events-none"
           preserveAspectRatio="none"
@@ -134,54 +173,88 @@ export default function ClipTransition({
             <pattern
               id={`stripe-${transition.id}`}
               patternUnits="userSpaceOnUse"
-              width="8"
-              height="8"
+              width="10"
+              height="10"
               patternTransform={`rotate(${position === 'start' ? 45 : -45})`}
             >
               <line
                 x1="0"
                 y1="0"
                 x2="0"
-                y2="8"
-                stroke="white"
-                strokeWidth="1"
+                y2="10"
+                stroke="var(--text-inverse)"
+                strokeWidth="1.5"
+                opacity="0.3"
               />
             </pattern>
+            <linearGradient
+              id={`transition-gradient-${transition.id}`}
+              x1="0%"
+              y1="0%"
+              x2={position === 'start' ? '100%' : '0%'}
+              y2="0%"
+            >
+              <stop offset="0%" style={{ stopColor: 'var(--accent)', stopOpacity: 0.6 }} />
+              <stop offset="100%" style={{ stopColor: 'var(--accent)', stopOpacity: 0.1 }} />
+            </linearGradient>
           </defs>
-          <rect
-            width="100%"
-            height="100%"
-            fill={`url(#stripe-${transition.id})`}
-          />
+          <rect width="100%" height="100%" fill={`url(#transition-gradient-${transition.id})`} />
+          <rect width="100%" height="100%" fill={`url(#stripe-${transition.id})`} />
         </svg>
 
         {/* Remove Button (on hover) */}
         {showTooltip && onRemove && (
           <button
             onClick={handleRemoveClick}
-            className={`absolute top-1 ${
-              position === 'start' ? 'right-1' : 'left-1'
-            } w-4 h-4 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white text-xs shadow-lg transition-all z-10`}
+            className={`absolute top-2 transition-all duration-300 ${
+              position === 'start' ? 'right-2' : 'left-2'
+            } w-5 h-5 rounded-full flex items-center justify-center text-xs z-20 hover:scale-110`}
+            style={{
+              background: 'var(--error)',
+              color: 'var(--text-inverse)',
+              boxShadow: '0 2px 8px var(--error)40',
+            }}
             title="Remove transition"
           >
             ×
           </button>
         )}
+
+        {/* Hover effect overlay */}
+        <div
+          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
+          style={{
+            background: position === 'start'
+              ? 'linear-gradient(90deg, var(--accent)20 0%, transparent 100%)'
+              : 'linear-gradient(-90deg, var(--accent)20 0%, transparent 100%)',
+          }}
+        />
       </div>
 
-      {/* Tooltip */}
+      {/* Enhanced Tooltip */}
       {showTooltip && (
         <div
-          className={`absolute ${
+          className={`absolute z-30 transition-all duration-300 ${
             position === 'start' ? 'left-0' : 'right-0'
-          } top-full mt-1 bg-gray-900 text-white text-xs rounded px-2 py-1 shadow-lg whitespace-nowrap z-20 pointer-events-none`}
+          } top-full mt-2 px-3 py-2 rounded-lg shadow-xl whitespace-nowrap pointer-events-none`}
+          style={{
+            background: 'var(--surface-elevated)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border-primary)',
+            boxShadow: 'var(--shadow-xl)',
+            transform: position === 'start'
+              ? 'translateX(0) translateY(0)'
+              : 'translateX(100%) translateY(0)',
+          }}
         >
-          <div className="font-semibold">{metadata.name}</div>
-          <div className="text-gray-400">
+          <div className="font-semibold text-sm" style={{ color: 'var(--accent)' }}>
+            {metadata.name}
+          </div>
+          <div className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
             {transition.direction === 'in' ? 'In' : 'Out'} • {transition.duration}ms
           </div>
-          <div className="text-gray-500 text-[10px] mt-0.5">
-            {position === 'start' ? 'Drag right edge →' : 'Drag left edge ←'} to adjust
+          <div className="text-[10px] mt-1 italic" style={{ color: 'var(--text-tertiary)' }}>
+            {position === 'start' ? 'Drag right edge →' : '← Drag left edge'} to adjust
           </div>
         </div>
       )}

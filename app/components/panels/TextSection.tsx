@@ -52,175 +52,243 @@ export const TextSection: React.FC<TextSectionProps> = ({
   onUpdate,
   disabled = false,
 }) => {
-  const alignmentButtons: { align: TextAlign; icon: typeof AlignLeft }[] = [
-    { align: 'left', icon: AlignLeft },
-    { align: 'center', icon: AlignCenter },
-    { align: 'right', icon: AlignRight },
-    { align: 'justify', icon: AlignJustify },
+  const alignmentButtons: { align: TextAlign; icon: typeof AlignLeft; label: string }[] = [
+    { align: 'left', icon: AlignLeft, label: 'Left' },
+    { align: 'center', icon: AlignCenter, label: 'Center' },
+    { align: 'right', icon: AlignRight, label: 'Right' },
+    { align: 'justify', icon: AlignJustify, label: 'Justify' },
   ];
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-white">Text</h3>
+    <div className="space-y-6">
+      {/* Section Header */}
+      <div className="flex items-center gap-2">
+        <div className="w-1 h-5 rounded-full bg-[var(--accent)]"></div>
+        <h3 className="text-sm font-semibold text-[var(--text-primary)]">Text Properties</h3>
+      </div>
 
       {/* Text Content */}
-      <div>
-        <label className="block text-xs text-zinc-400 mb-2">Content</label>
-        <textarea
-          value={element.content}
-          onChange={(e) => onUpdate({ content: e.target.value })}
-          disabled={disabled}
-          className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white text-sm placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none disabled:opacity-50"
-          rows={3}
-        />
-      </div>
-
-      {/* Font Family */}
-      <Dropdown
-        label="Font Family"
-        value={element.fontFamily}
-        onChange={(value) => onUpdate({ fontFamily: value })}
-        options={FONT_FAMILIES.map((font) => ({
-          value: font,
-          label: font,
-        }))}
-        disabled={disabled}
-      />
-
-      {/* Font Size and Weight */}
-      <div className="grid grid-cols-2 gap-2">
-        <Input
-          label="Size"
-          type="number"
-          value={element.fontSize}
-          onChange={(e) => onUpdate({ fontSize: parseFloat(e.target.value) || 16 })}
-          disabled={disabled}
-          className="text-xs"
-          min={1}
-          rightIcon={<span className="text-xs text-zinc-500">px</span>}
-        />
-        <Dropdown
-          label="Weight"
-          value={element.fontWeight.toString()}
-          onChange={(value) => onUpdate({ fontWeight: parseInt(value) as FontWeight })}
-          options={FONT_WEIGHTS.map((w) => ({
-            value: w.value.toString(),
-            label: w.label,
-          }))}
-          disabled={disabled}
-        />
-      </div>
-
-      {/* Text Color */}
-      <ColorPicker
-        label="Color"
-        value={element.color}
-        onChange={(value) => onUpdate({ color: value })}
-        disabled={disabled}
-      />
-
-      {/* Text Alignment */}
       <div className="space-y-2">
-        <label className="block text-xs text-zinc-400">Alignment</label>
-        <div className="grid grid-cols-4 gap-2">
-          {alignmentButtons.map(({ align, icon: Icon }) => (
-            <button
-              key={align}
-              onClick={() => onUpdate({ textAlign: align })}
-              disabled={disabled}
-              className={`flex items-center justify-center px-3 py-2 rounded-md transition-colors ${
-                element.textAlign === align
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
-              title={align.charAt(0).toUpperCase() + align.slice(1)}
-            >
-              <Icon className="w-4 h-4" />
-            </button>
-          ))}
+        <label className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide">
+          Content
+        </label>
+        <div className="p-3 bg-[var(--surface-elevated)]/50 rounded-lg border border-[var(--border-primary)]">
+          <textarea
+            value={element.content}
+            onChange={(e) => onUpdate({ content: e.target.value })}
+            disabled={disabled}
+            className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border-primary)] rounded-md text-[var(--text-primary)] text-sm placeholder-[var(--text-tertiary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)] resize-none disabled:opacity-50 min-h-[80px]"
+            rows={3}
+            placeholder="Enter your text here..."
+          />
+          <div className="mt-2 text-xs text-[var(--text-tertiary)]">
+            {element.content.length} characters
+          </div>
         </div>
       </div>
 
-      {/* Line Height */}
-      <Input
-        label="Line Height"
-        type="number"
-        step="0.1"
-        value={element.lineHeight}
-        onChange={(e) => onUpdate({ lineHeight: parseFloat(e.target.value) || 1 })}
-        disabled={disabled}
-        className="text-xs"
-        min={0.5}
-        max={3}
-      />
-
-      {/* Letter Spacing */}
-      <Input
-        label="Letter Spacing"
-        type="number"
-        step="0.5"
-        value={element.letterSpacing}
-        onChange={(e) => onUpdate({ letterSpacing: parseFloat(e.target.value) || 0 })}
-        disabled={disabled}
-        className="text-xs"
-        rightIcon={<span className="text-xs text-zinc-500">px</span>}
-      />
-
-      {/* Background Color */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <label className="block text-xs text-zinc-400">Background</label>
-          {element.backgroundColor && (
-            <button
-              onClick={() => onUpdate({ backgroundColor: undefined })}
-              disabled={disabled}
-              className="text-xs text-red-500 hover:text-red-400 disabled:opacity-50"
-            >
-              Remove
-            </button>
-          )}
+      {/* Typography Controls */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <label className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide">
+            Typography
+          </label>
+          <div className="flex-1 h-px bg-[var(--border-primary)]"></div>
         </div>
-        {element.backgroundColor ? (
-          <ColorPicker
-            value={element.backgroundColor}
-            onChange={(value) => onUpdate({ backgroundColor: value })}
+
+        <div className="p-3 bg-[var(--surface-elevated)]/50 rounded-lg border border-[var(--border-primary)] space-y-4">
+          {/* Font Family */}
+          <Dropdown
+            label="Font Family"
+            value={element.fontFamily}
+            onChange={(value) => onUpdate({ fontFamily: value })}
+            options={FONT_FAMILIES.map((font) => ({
+              value: font,
+              label: font,
+            }))}
             disabled={disabled}
           />
-        ) : (
-          <button
-            onClick={() => onUpdate({ backgroundColor: '#000000' })}
+
+          {/* Font Size and Weight */}
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="Size"
+              type="number"
+              value={element.fontSize}
+              onChange={(e) => onUpdate({ fontSize: parseFloat(e.target.value) || 16 })}
+              disabled={disabled}
+              className="text-sm"
+              min={1}
+              rightIcon={<span className="text-xs text-[var(--text-tertiary)]">px</span>}
+            />
+            <Dropdown
+              label="Weight"
+              value={element.fontWeight.toString()}
+              onChange={(value) => onUpdate({ fontWeight: parseInt(value) as FontWeight })}
+              options={FONT_WEIGHTS.map((w) => ({
+                value: w.value.toString(),
+                label: w.label,
+              }))}
+              disabled={disabled}
+            />
+          </div>
+
+          {/* Text Color */}
+          <ColorPicker
+            label="Color"
+            value={element.color}
+            onChange={(value) => onUpdate({ color: value })}
             disabled={disabled}
-            className="w-full px-3 py-2 text-xs font-medium bg-zinc-800 text-zinc-400 rounded-md hover:bg-zinc-700 disabled:opacity-50"
-          >
-            Add Background
-          </button>
+          />
+        </div>
+      </div>
+
+      {/* Text Alignment */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <label className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide">
+            Alignment
+          </label>
+          <div className="flex-1 h-px bg-[var(--border-primary)]"></div>
+        </div>
+
+        <div className="p-3 bg-[var(--surface-elevated)]/50 rounded-lg border border-[var(--border-primary)]">
+          <div className="grid grid-cols-4 gap-2">
+            {alignmentButtons.map(({ align, icon: Icon, label }) => (
+              <button
+                key={align}
+                onClick={() => onUpdate({ textAlign: align })}
+                disabled={disabled}
+                className={`flex flex-col items-center justify-center p-3 rounded-lg transition-all duration-200 ${
+                  element.textAlign === align
+                    ? 'bg-[var(--primary)]/10 border border-[var(--primary)]/30 text-[var(--primary)]'
+                    : 'bg-[var(--surface)] border border-[var(--border-primary)] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                title={label}
+              >
+                <Icon className="w-4 h-4 mb-1" />
+                <span className="text-xs">{label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Spacing Controls */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <label className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide">
+            Spacing
+          </label>
+          <div className="flex-1 h-px bg-[var(--border-primary)]"></div>
+        </div>
+
+        <div className="p-3 bg-[var(--surface-elevated)]/50 rounded-lg border border-[var(--border-primary)] space-y-4">
+          <Input
+            label="Line Height"
+            type="number"
+            step="0.1"
+            value={element.lineHeight}
+            onChange={(e) => onUpdate({ lineHeight: parseFloat(e.target.value) || 1 })}
+            disabled={disabled}
+            className="text-sm"
+            min={0.5}
+            max={3}
+          />
+
+          <Input
+            label="Letter Spacing"
+            type="number"
+            step="0.5"
+            value={element.letterSpacing}
+            onChange={(e) => onUpdate({ letterSpacing: parseFloat(e.target.value) || 0 })}
+            disabled={disabled}
+            className="text-sm"
+            rightIcon={<span className="text-xs text-[var(--text-tertiary)]">px</span>}
+          />
+        </div>
+      </div>
+
+      {/* Background Color */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide">
+              Background
+            </label>
+            <div className="flex-1 h-px bg-[var(--border-primary)]"></div>
+          </div>
+          {element.backgroundColor && (
+            <Button
+              onClick={() => onUpdate({ backgroundColor: undefined })}
+              disabled={disabled}
+              variant="ghost"
+              size="sm"
+              className="text-xs text-[var(--error)] hover:text-[var(--error)] hover:bg-[var(--error-bg)]"
+            >
+              Remove
+            </Button>
+          )}
+        </div>
+
+        {element.backgroundColor ? (
+          <div className="p-3 bg-[var(--surface-elevated)]/50 rounded-lg border border-[var(--border-primary)]">
+            <ColorPicker
+              value={element.backgroundColor}
+              onChange={(value) => onUpdate({ backgroundColor: value })}
+              disabled={disabled}
+            />
+          </div>
+        ) : (
+          <div className="p-4 bg-[var(--surface-elevated)]/50 rounded-lg border border-[var(--border-primary)] border-dashed">
+            <button
+              onClick={() => onUpdate({ backgroundColor: 'rgba(0,0,0,0.8)' })}
+              disabled={disabled}
+              className="w-full flex flex-col items-center justify-center gap-2 py-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors group"
+            >
+              <div className="w-10 h-10 rounded-lg bg-[var(--surface-hover)] flex items-center justify-center group-hover:bg-[var(--primary)]/10 transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium">Add Background</span>
+              <span className="text-xs text-[var(--text-tertiary)]">Add a background color</span>
+            </button>
+          </div>
         )}
       </div>
 
       {/* Text Style Toggles */}
-      <div className="grid grid-cols-2 gap-2">
-        <button
-          onClick={() => onUpdate({ fontStyle: element.fontStyle === 'italic' ? 'normal' : 'italic' })}
-          disabled={disabled}
-          className={`px-3 py-2 text-xs font-medium italic rounded-md transition-colors ${
-            element.fontStyle === 'italic'
-              ? 'bg-blue-600 text-white'
-              : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
-          } disabled:opacity-50 disabled:cursor-not-allowed`}
-        >
-          Italic
-        </button>
-        <button
-          onClick={() => onUpdate({ textDecoration: element.textDecoration === 'underline' ? 'none' : 'underline' })}
-          disabled={disabled}
-          className={`px-3 py-2 text-xs font-medium underline rounded-md transition-colors ${
-            element.textDecoration === 'underline'
-              ? 'bg-blue-600 text-white'
-              : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
-          } disabled:opacity-50 disabled:cursor-not-allowed`}
-        >
-          Underline
-        </button>
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <label className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide">
+            Text Style
+          </label>
+          <div className="flex-1 h-px bg-[var(--border-primary)]"></div>
+        </div>
+
+        <div className="p-3 bg-[var(--surface-elevated)]/50 rounded-lg border border-[var(--border-primary)]">
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              onClick={() => onUpdate({ fontStyle: element.fontStyle === 'italic' ? 'normal' : 'italic' })}
+              disabled={disabled}
+              variant={element.fontStyle === 'italic' ? 'primary' : 'secondary'}
+              size="sm"
+              className="font-medium"
+            >
+              <span className="italic">Italic</span>
+            </Button>
+            <Button
+              onClick={() => onUpdate({ textDecoration: element.textDecoration === 'underline' ? 'none' : 'underline' })}
+              disabled={disabled}
+              variant={element.textDecoration === 'underline' ? 'primary' : 'secondary'}
+              size="sm"
+              className="font-medium underline"
+            >
+              Underline
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );

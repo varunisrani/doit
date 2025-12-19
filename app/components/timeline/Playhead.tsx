@@ -50,35 +50,71 @@ export function Playhead({ currentTime, zoom, height, onDrag }: PlayheadProps) {
         height: `${height}px`,
       }}
     >
-      {/* Playhead line */}
-      <div className="relative w-0 h-full">
-        <div className="absolute top-0 left-0 w-0.5 h-full bg-red-500 shadow-lg" />
+      {/* Playhead line with glow effect */}
+      <div className="relative w-full h-full">
+        {/* Main line */}
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-0.5 h-full transition-all duration-100"
+          style={{
+            background: 'var(--playhead)',
+            boxShadow: `0 0 6px var(--playhead), 0 0 12px var(--playhead)60`,
+          }}
+        />
+
+        {/* Animated pulse effect */}
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-1 h-full animate-pulse opacity-30"
+          style={{
+            background: 'var(--playhead)',
+          }}
+        />
       </div>
 
       {/* Playhead handle */}
       <div
-        className="absolute -top-1 -left-3 w-6 h-6 pointer-events-auto cursor-ew-resize group"
+        className="absolute -top-2 -left-4 w-8 h-8 pointer-events-auto cursor-ew-resize group"
         onMouseDown={handleMouseDown}
       >
-        {/* Triangle handle */}
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          className="drop-shadow-md"
-        >
-          <path
-            d="M12 2 L20 10 L12 10 L4 10 Z"
-            fill="#ef4444"
-            stroke="#dc2626"
-            strokeWidth="1"
-          />
-        </svg>
+        {/* Diamond handle with modern design */}
+        <div
+          className="absolute inset-0 transform rotate-45 transition-all duration-200 group-hover:scale-110"
+          style={{
+            background: 'var(--playhead)',
+            boxShadow: `0 2px 8px var(--playhead)60, 0 0 0 1px var(--playhead)40`,
+          }}
+        />
+
+        {/* Inner diamond for visual depth */}
+        <div
+          className="absolute inset-1 transform rotate-45"
+          style={{
+            background: 'var(--playhead)',
+            opacity: 0.8,
+          }}
+        />
 
         {/* Time tooltip */}
-        <div className="absolute top-7 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+        <div
+          className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 text-xs font-mono rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap pointer-events-none"
+          style={{
+            background: 'var(--surface-elevated)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border-primary)',
+            boxShadow: 'var(--shadow-lg)',
+            transform: 'translateX(-50%) translateY(4px)',
+          }}
+        >
           {formatTime(currentTime * 1000)}
         </div>
+
+        {/* Hover state indicator */}
+        <div
+          className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+          style={{
+            background: 'var(--playhead)',
+            opacity: 0.2,
+          }}
+        />
       </div>
     </div>
   );

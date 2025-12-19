@@ -1,185 +1,262 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
-import { ChevronLeft, ChevronRight, Layers, Settings, Clock, Monitor, MousePointer } from 'lucide-react';
+import { IconButton } from '../ui/IconButton';
+import { Button } from '../ui/Button';
+import EditorCanvas from '../canvas/EditorCanvas';
+import { Timeline } from '../timeline/Timeline';
+import { PropertiesPanel } from '../panels/PropertiesPanel';
+import { useEditorStore } from '@/app/lib/store/editorStore';
+import { useCanvasStore } from '@/app/lib/store/canvasStore';
+import { useTimelineStore } from '@/app/lib/store/timelineStore';
+import { useSelectionStore } from '@/app/lib/store/selectionStore';
+import { useAutoSave } from '@/app/hooks/useAutoSave';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Layers,
+  MousePointer,
+  Maximize2,
+  ZoomIn,
+  ZoomOut,
+  Type,
+  Square,
+  Hand,
+  Grid,
+  Ruler,
+} from 'lucide-react';
 
 interface EditorLayoutProps {
   children?: React.ReactNode;
 }
 
 export const EditorLayout: React.FC<EditorLayoutProps> = ({ children }) => {
-  const [showSidebar, setShowSidebar] = useState(true);
-  const [showProperties, setShowProperties] = useState(true);
+  // Store state
+  const {
+    sidebarVisible,
+    propertiesVisible,
+    setSidebarVisible,
+    setPropertiesVisible,
+    currentTool,
+    setCurrentTool,
+    project,
+    canvasTransform,
+    setZoom,
+  } = useEditorStore();
+
+  const { elements, createTextElement, createShapeElement } = useCanvasStore();
+  const { tracks } = useTimelineStore();
+  const { clearAll } = useSelectionStore();
+
+  // Local state
+  const [showGrid, setShowGrid] = useState(true);
+  const [showGuides, setShowGuides] = useState(false);
+  const [canvasZoom, setCanvasZoom] = useState(100);
+
+  // Auto-save hook
+  const { hasUnsavedChanges, saveNow } = useAutoSave();
+
+  // Sync zoom between local state and store
+  useEffect(() => {
+    setCanvasZoom(Math.round(canvasTransform.zoom * 100));
+  }, [canvasTransform.zoom]);
+
+  const handleZoomChange = useCallback((newZoom: number) => {
+    const clampedZoom = Math.max(25, Math.min(400, newZoom));
+    setCanvasZoom(clampedZoom);
+    setZoom(clampedZoom / 100);
+  }, [setZoom]);
+
+  // Tool change handler
+  const handleToolChange = useCallback((tool: typeof currentTool) => {
+    setCurrentTool(tool);
+    if (tool !== 'select') {
+      clearAll();
+    }
+  }, [setCurrentTool, clearAll]);
+
+  // Handle canvas click for tool actions
+  const handleCanvasToolAction = useCallback((x: number, y: number) => {
+    switch (currentTool) {
+      case 'text':
+        createTextElement('New Text', x, y);
+        setCurrentTool('select');
+        break;
+      case 'shape':
+        createShapeElement('rectangle', x, y);
+        setCurrentTool('select');
+        break;
+      default:
+        break;
+    }
+  }, [currentTool, createTextElement, createShapeElement, setCurrentTool]);
 
   return (
-    <div className="h-screen flex flex-col">
-      <div className="enterprise-header border-b border-accent z-50">
+    <div className="h-screen flex flex-col bg-[var(--background)] text-[var(--text-primary)]">
+      {/* Header */}
+      <div className="h-16 bg-[var(--surface-elevated)] border-b border-[var(--border-primary)] z-50 backdrop-blur-xl">
         <Header />
       </div>
 
-      <div className="flex-1 flex overflow-hidden relative z-10">
-        {showSidebar && (
-          <div className="enterprise-sidebar border-r border-accent">
+      {/* Main Content Area */}
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* Sidebar Toggle Button */}
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 z-40 flex items-center">
+          <IconButton
+            icon={sidebarVisible ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+            variant="secondary"
+            size="sm"
+            onClick={() => setSidebarVisible(!sidebarVisible)}
+            tooltip={sidebarVisible ? "Hide Sidebar" : "Show Sidebar"}
+            className="rounded-r-lg rounded-l-none border-l-0 shadow-lg"
+          />
+        </div>
+
+        {/* Left Sidebar */}
+        {sidebarVisible && (
+          <div className="w-72 md:w-80 bg-[var(--surface)] border-r border-[var(--border-primary)] flex-shrink-0 transition-all duration-300 ease-in-out">
             <Sidebar />
           </div>
         )}
 
-        <button
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-50 w-6 h-12 enterprise-button rounded-r flex items-center justify-center text-muted hover:text-foreground border-l-0"
-          style={{ left: showSidebar ? 'rem' : '0' }}
-          onClick={() => setShowSidebar(!showSidebar)}
-          title={showSidebar ? "Hide Sidebar" : "Show Sidebar"}
-        >
-          {showSidebar ? (
-            <ChevronLeft className="w-4 h-4" />
-          ) : (
-            <ChevronRight className="w-4 h-4" />
-          )}
-        </button>
-
-        <div className="flex-1 flex flex-col min-w-0 gap-0">
+        {/* Main Workspace */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Canvas Area */}
           <div className="flex-1 flex flex-col relative">
-            <div className="enterprise-timeline-ruler h-8 flex items-center px-3 border-b border-accent">
-              <button className="enterprise-compact enterprise-button mr-2"><MousePointer className="w-3 h-3" /></button>
-              <div className="w-px h-3 bg-accent mx-1"></div>
-              <span className="enterprise-compact text-muted font-mono mr-4">1920x1080</span>
-              <div className="w-px h-3 bg-accent mx-1"></div>
-              <span className="enterprise-compact text-muted">Zoom: 100%</span>
-            </div>
+            {/* Canvas Toolbar */}
+            <div className="h-12 bg-[var(--surface)] border-b border-[var(--border-primary)] flex items-center justify-between px-4">
+              <div className="flex items-center gap-3">
+                {/* Tool Selection */}
+                <div className="flex items-center gap-1 bg-[var(--surface-elevated)] rounded-lg p-1">
+                  <IconButton
+                    icon={<MousePointer className="w-4 h-4" />}
+                    variant={currentTool === 'select' ? 'primary' : 'ghost'}
+                    size="sm"
+                    tooltip="Select Tool (V)"
+                    onClick={() => handleToolChange('select')}
+                  />
+                  <IconButton
+                    icon={<Type className="w-4 h-4" />}
+                    variant={currentTool === 'text' ? 'primary' : 'ghost'}
+                    size="sm"
+                    tooltip="Text Tool (T)"
+                    onClick={() => handleToolChange('text')}
+                  />
+                  <IconButton
+                    icon={<Square className="w-4 h-4" />}
+                    variant={currentTool === 'shape' ? 'primary' : 'ghost'}
+                    size="sm"
+                    tooltip="Shape Tool (R)"
+                    onClick={() => handleToolChange('shape')}
+                  />
+                  <IconButton
+                    icon={<Hand className="w-4 h-4" />}
+                    variant={currentTool === 'hand' ? 'primary' : 'ghost'}
+                    size="sm"
+                    tooltip="Hand Tool (H)"
+                    onClick={() => handleToolChange('hand')}
+                  />
+                </div>
 
-            <div className="flex-1 flex items-center justify-center p-4">
-              <div className="w-full max-w-5xl aspect-video enterprise-canvas rounded flex items-center justify-center relative overflow-hidden border border-accent">
-                <div className="text-center text-muted">
-                  <Monitor className="w-12 h-12 mx-auto mb-3 opacity-60" />
-                  <p className="text-xs font-medium">Canvas Empty</p>
+                <div className="w-px h-4 bg-[var(--border-secondary)]"></div>
+
+                {/* Canvas Info */}
+                <span className="text-sm font-mono text-[var(--text-secondary)]">
+                  {project.width}x{project.height}
+                </span>
+
+                <div className="w-px h-4 bg-[var(--border-secondary)]"></div>
+
+                {/* Zoom Controls */}
+                <div className="flex items-center gap-2">
+                  <IconButton
+                    icon={<ZoomOut className="w-4 h-4" />}
+                    variant="ghost"
+                    size="sm"
+                    tooltip="Zoom Out (Ctrl+-)"
+                    onClick={() => handleZoomChange(canvasZoom - 25)}
+                  />
+                  <span className="text-sm font-mono text-[var(--text-secondary)] min-w-[60px] text-center">
+                    {canvasZoom}%
+                  </span>
+                  <IconButton
+                    icon={<ZoomIn className="w-4 h-4" />}
+                    variant="ghost"
+                    size="sm"
+                    tooltip="Zoom In (Ctrl++)"
+                    onClick={() => handleZoomChange(canvasZoom + 25)}
+                  />
+                  <IconButton
+                    icon={<Maximize2 className="w-4 h-4" />}
+                    variant="ghost"
+                    size="sm"
+                    tooltip="Fit to Screen (Ctrl+0)"
+                    onClick={() => handleZoomChange(100)}
+                  />
                 </div>
               </div>
+
+              {/* Right side toolbar options */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={showGrid ? 'primary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setShowGrid(!showGrid)}
+                  leftIcon={<Grid className="w-4 h-4" />}
+                >
+                  Grid
+                </Button>
+                <Button
+                  variant={showGuides ? 'primary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setShowGuides(!showGuides)}
+                  leftIcon={<Ruler className="w-4 h-4" />}
+                >
+                  Guides
+                </Button>
+              </div>
+            </div>
+
+            {/* Canvas Container */}
+            <div className="flex-1 bg-[var(--background)] overflow-hidden">
+              <EditorCanvas
+                width={project.width}
+                height={project.height}
+                showGrid={showGrid}
+                gridSize={50}
+              />
             </div>
           </div>
-          <div className="h-64 enterprise-timeline flex flex-col overflow-hidden">
-            <div className="enterprise-timeline-ruler h-8 flex items-center justify-between px-3 border-b border-accent">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1 text-muted">
-                  <Clock className="w-3 h-3" />
-                  <span className="enterprise-compact font-mono">00:00:00:00</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-1">
-                <button className="enterprise-compact enterprise-button"><Layers className="w-3 h-3" /></button>
-              </div>
-            </div>
 
-            <div className="enterprise-timeline-ruler h-6 flex items-center px-3 border-b border-accent text-xs text-muted font-mono">
-              <span className="mr-8">00:00</span>
-              <span className="mr-8">00:05</span>
-              <span className="mr-8">00:10</span>
-              <span className="mr-8">00:15</span>
-              <span className="mr-8">00:20</span>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-1 space-y-1 bg-secondary">
-              <div className="h-16 bg-secondary border border-accent relative hover:border-primary transition-colors">
-                <div className="absolute left-0 top-0 bottom-0 w-24 border-r border-accent bg-enterprise-sidebar flex items-center justify-center">
-                  <span className="enterprise-compact text-muted font-medium">Video 1</span>
-                </div>
-              </div>
-              <div className="h-16 bg-secondary border border-accent relative hover:border-primary transition-colors">
-                <div className="absolute left-0 top-0 bottom-0 w-24 border-r border-accent bg-enterprise-sidebar flex items-center justify-center">
-                  <span className="enterprise-compact text-muted font-medium">Video 2</span>
-                </div>
-              </div>
-              <div className="h-16 bg-secondary border border-accent relative hover:border-primary transition-colors">
-                <div className="absolute left-0 top-0 bottom-0 w-24 border-r border-accent bg-enterprise-sidebar flex items-center justify-center">
-                  <span className="enterprise-compact text-muted font-medium">Audio 1</span>
-                </div>
-              </div>
-              <div className="h-16 bg-secondary border border-accent relative hover:border-primary transition-colors">
-                <div className="absolute left-0 top-0 bottom-0 w-24 border-r border-accent bg-enterprise-sidebar flex items-center justify-center">
-                  <span className="enterprise-compact text-muted font-medium">Text 1</span>
-                </div>
-              </div>
-            </div>
+          {/* Timeline Area */}
+          <div className="h-72 bg-[var(--timeline-bg)] border-t border-[var(--border-primary)]">
+            <Timeline />
           </div>
         </div>
-        <button
-          className="w-6 h-12 self-center enterprise-button rounded-l flex items-center justify-center text-muted hover:text-foreground border-r-0"
-          onClick={() => setShowProperties(!showProperties)}
-          title={showProperties ? "Hide Properties" : "Show Properties"}
-        >
-          {showProperties ? (
-            <ChevronRight className="w-4 h-4" />
-          ) : (
-            <ChevronLeft className="w-4 h-4" />
-          )}
-        </button>
 
-        {showProperties && (
-          <aside className="w-72 enterprise-panel border-l border-accent overflow-y-auto z-20">
-            <div className="p-4">
-              <h2 className="text-sm font-medium text-primary mb-4 flex items-center gap-2">
-                <Settings className="w-4 h-4" />
-                Properties
-              </h2>
+        {/* Properties Panel Toggle */}
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 z-40 flex items-center">
+          <IconButton
+            icon={propertiesVisible ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            variant="secondary"
+            size="sm"
+            onClick={() => setPropertiesVisible(!propertiesVisible)}
+            tooltip={propertiesVisible ? "Hide Properties" : "Show Properties"}
+            className="rounded-l-lg rounded-r-none border-r-0 shadow-lg"
+          />
+        </div>
 
-              <div className="space-y-4">
-                <div className="enterprise-panel p-3 border border-accent">
-                  <h3 className="text-xs font-medium text-foreground mb-3">Transform</h3>
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="text-xs text-muted font-medium mb-1 block">X</label>
-                        <input type="number" className="w-full enterprise-input enterprise-compact rounded" defaultValue={0} />
-                      </div>
-                      <div>
-                        <label className="text-xs text-muted font-medium mb-1 block">Y</label>
-                        <input type="number" className="w-full enterprise-input enterprise-compact rounded" defaultValue={0} />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="text-xs text-muted font-medium mb-1 block">W</label>
-                        <input type="number" className="w-full enterprise-input enterprise-compact rounded" defaultValue={1920} />
-                      </div>
-                      <div>
-                        <label className="text-xs text-muted font-medium mb-1 block">H</label>
-                        <input type="number" className="w-full enterprise-input enterprise-compact rounded" defaultValue={1080} />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-xs text-muted font-medium mb-1 block">Rotation</label>
-                      <input type="range" className="w-full h-1" min="0" max="360" defaultValue={0} />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="enterprise-panel p-3 border border-accent">
-                  <h3 className="text-xs font-medium text-foreground mb-3">Appearance</h3>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-xs text-muted font-medium mb-1 block">Opacity</label>
-                      <div className="flex items-center gap-2">
-                        <input type="range" className="flex-1 h-1" min="0" max="100" defaultValue={100} />
-                        <span className="text-xs text-muted w-8 text-right">100%</span>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-xs text-muted font-medium mb-1 block">Blend Mode</label>
-                      <select className="w-full enterprise-input enterprise-compact rounded">
-                        <option>Normal</option>
-                        <option>Multiply</option>
-                        <option>Screen</option>
-                        <option>Overlay</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </aside>
+        {/* Properties Panel */}
+        {propertiesVisible && (
+          <div className="z-30 transition-all duration-300 ease-in-out">
+            <PropertiesPanel />
+          </div>
         )}
       </div>
+
+      {/* Render children for additional content */}
       {children}
     </div>
   );

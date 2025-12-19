@@ -44,49 +44,89 @@ export function TimelineTrack({
     }
   };
 
-  // Get track color
+  // Get track color using design tokens
   const getTrackColor = () => {
     switch (track.type) {
       case 'video':
-        return 'border-blue-700';
+        return 'var(--track-video)';
       case 'audio':
-        return 'border-green-700';
+        return 'var(--track-audio)';
       case 'text':
-        return 'border-orange-700';
+        return 'var(--track-text)';
       default:
-        return 'border-gray-700';
+        return 'var(--track-effect)';
+    }
+  };
+
+  const getTrackBgColor = () => {
+    switch (track.type) {
+      case 'video':
+        return 'rgba(59, 130, 246, 0.1)'; // track-video with opacity
+      case 'audio':
+        return 'rgba(16, 185, 129, 0.1)'; // track-audio with opacity
+      case 'text':
+        return 'rgba(245, 158, 11, 0.1)'; // track-text with opacity
+      default:
+        return 'rgba(139, 92, 246, 0.1)'; // track-effect with opacity
     }
   };
 
   return (
     <div
-      className={`flex border-b ${getTrackColor()} bg-gray-900`}
-      style={{ height: `${trackHeight}px` }}
+      className="flex border-b transition-all duration-200"
+      style={{
+        height: `${trackHeight}px`,
+        background: 'var(--timeline-track)',
+        borderColor: 'var(--border-primary)',
+        borderLeftWidth: '3px',
+        borderLeftColor: getTrackColor()
+      }}
     >
       {/* Track header */}
-      <div className="w-48 flex-shrink-0 bg-gray-800 border-r border-gray-700 flex flex-col">
+      <div
+        className="w-48 flex-shrink-0 flex flex-col"
+        style={{
+          background: 'var(--surface-elevated)',
+          borderRight: `1px solid var(--border-primary)`
+        }}
+      >
         {/* Track name */}
-        <div className="flex-1 px-3 py-2 flex items-center gap-2">
-          <div className="text-gray-400">
+        <div className="flex-1 px-4 py-3 flex items-center gap-3">
+          <div
+            className="p-1.5 rounded-md transition-all duration-200"
+            style={{
+              background: getTrackBgColor(),
+              color: getTrackColor()
+            }}
+          >
             {getTrackIcon()}
           </div>
-          <div className="flex-1 text-sm text-gray-200 font-medium truncate">
+          <div
+            className="flex-1 text-sm font-medium truncate transition-colors duration-200"
+            style={{ color: 'var(--text-primary)' }}
+          >
             {track.name}
           </div>
         </div>
 
         {/* Track controls */}
-        <div className="px-2 pb-2 flex items-center gap-1">
+        <div className="px-3 pb-3 flex items-center gap-1">
           {/* Visibility toggle */}
           <button
             onClick={onToggleVisibility}
             className={`
-              p-1 rounded hover:bg-gray-700 transition-colors
-              ${track.visible ? 'text-gray-400' : 'text-gray-600'}
+              p-2 rounded-lg transition-all duration-200 min-h-[36px] min-w-[36px] flex items-center justify-center
+              ${track.visible
+                ? 'hover:bg-[var(--surface-hover)]'
+                : 'opacity-50 hover:bg-[var(--surface-hover)]'
+              }
             `}
+            style={{
+              color: track.visible ? 'var(--text-secondary)' : 'var(--text-tertiary)'
+            }}
             title={track.visible ? 'Hide track' : 'Show track'}
           >
-            {track.visible ? <Eye size={14} /> : <EyeOff size={14} />}
+            {track.visible ? <Eye size={16} /> : <EyeOff size={16} />}
           </button>
 
           {/* Mute toggle (for audio/video tracks) */}
@@ -94,12 +134,18 @@ export function TimelineTrack({
             <button
               onClick={onToggleMute}
               className={`
-                p-1 rounded hover:bg-gray-700 transition-colors
-                ${track.muted ? 'text-red-500' : 'text-gray-400'}
+                p-2 rounded-lg transition-all duration-200 min-h-[36px] min-w-[36px] flex items-center justify-center
+                ${track.muted
+                  ? 'hover:bg-[var(--error-bg)]'
+                  : 'hover:bg-[var(--surface-hover)]'
+                }
               `}
+              style={{
+                color: track.muted ? 'var(--error)' : 'var(--text-secondary)'
+              }}
               title={track.muted ? 'Unmute track' : 'Mute track'}
             >
-              {track.muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+              {track.muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
             </button>
           )}
 
@@ -107,25 +153,50 @@ export function TimelineTrack({
           <button
             onClick={onToggleLock}
             className={`
-              p-1 rounded hover:bg-gray-700 transition-colors
-              ${track.locked ? 'text-yellow-500' : 'text-gray-400'}
+              p-2 rounded-lg transition-all duration-200 min-h-[36px] min-w-[36px] flex items-center justify-center
+              ${track.locked
+                ? 'hover:bg-[var(--warning-bg)]'
+                : 'hover:bg-[var(--surface-hover)]'
+              }
             `}
+            style={{
+              color: track.locked ? 'var(--warning)' : 'var(--text-secondary)'
+            }}
             title={track.locked ? 'Unlock track' : 'Lock track'}
           >
-            {track.locked ? <Lock size={14} /> : <Unlock size={14} />}
+            {track.locked ? <Lock size={16} /> : <Unlock size={16} />}
           </button>
         </div>
       </div>
 
       {/* Clips area */}
-      <div className="flex-1 relative bg-gray-900">
+      <div
+        className="flex-1 relative transition-colors duration-200"
+        style={{
+          background: track.locked ? 'var(--surface)' : 'var(--timeline-track)',
+        }}
+        onMouseEnter={(e) => {
+          if (!track.locked) {
+            e.currentTarget.style.background = 'var(--timeline-track-hover)';
+          }
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = track.locked
+            ? 'var(--surface)'
+            : 'var(--timeline-track)';
+        }}
+      >
         {/* Grid lines (every 5 seconds) */}
         <div className="absolute inset-0 pointer-events-none">
           {Array.from({ length: Math.ceil(100 / 5) }).map((_, i) => (
             <div
               key={i}
-              className="absolute top-0 bottom-0 w-px bg-gray-800"
-              style={{ left: `${i * 5 * zoom}px` }}
+              className="absolute top-0 bottom-0 opacity-30"
+              style={{
+                left: `${i * 5 * zoom}px`,
+                width: '1px',
+                background: 'var(--border-secondary)'
+              }}
             />
           ))}
         </div>
@@ -146,7 +217,19 @@ export function TimelineTrack({
 
         {/* Drop zone overlay (when locked) */}
         {track.locked && (
-          <div className="absolute inset-0 bg-gray-900 bg-opacity-50 pointer-events-none" />
+          <div
+            className="absolute inset-0 pointer-events-none flex items-center justify-center"
+            style={{
+              background: 'rgba(0, 0, 0, 0.4)',
+              backdropFilter: 'var(--backdrop-blur)'
+            }}
+          >
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
+                 style={{ background: 'var(--surface)', color: 'var(--text-tertiary)' }}>
+              <Lock size={14} />
+              <span className="text-xs font-medium">Track Locked</span>
+            </div>
+          </div>
         )}
       </div>
     </div>

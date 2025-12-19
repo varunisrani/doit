@@ -112,45 +112,65 @@ export default function TransformControls({ elements, zoom }: TransformControlsP
   );
 
   /**
-   * Renders a resize handle
+   * Renders a resize handle with modern design
    */
   const renderHandle = (handleType: HandleType, position: Point, isRotation: boolean = false) => {
     const cursor = getHandleCursor(handleType, virtualElement.rotation);
+    const isActive = activeHandle === handleType;
 
     return (
       <div
         key={handleType}
-        className={`transform-handle ${handleType} ${activeHandle === handleType ? 'active' : ''}`}
+        className={`transform-handle ${handleType} ${isActive ? 'active' : ''}`}
         style={{
           position: 'absolute',
           left: position.x - handleSize / 2,
           top: position.y - handleSize / 2,
-          width: handleSize,
-          height: handleSize,
-          backgroundColor: isRotation ? '#10b981' : '#3b82f6',
+          width: Math.max(handleSize, 8), // Minimum 8px for touch targets
+          height: Math.max(handleSize, 8),
+          backgroundColor: isRotation ? 'var(--success)' : 'var(--primary)',
           border: '2px solid white',
           borderRadius: isRotation ? '50%' : '2px',
           cursor,
           boxSizing: 'border-box',
           zIndex: 1001,
-          transform: 'scale(1)',
-          transition: activeHandle ? 'none' : 'transform 0.1s',
+          transform: `scale(${isActive ? 1.4 : 1})`,
+          transition: activeHandle ? 'none' : 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease',
+          boxShadow: isActive
+            ? '0 0 0 4px rgba(37, 99, 235, 0.2), 0 4px 12px rgba(0, 0, 0, 0.3)'
+            : '0 2px 8px rgba(0, 0, 0, 0.2)',
         }}
         onMouseDown={(e) => handleMouseDown(e, handleType)}
         onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'scale(1.3)';
-        }}
-        onMouseLeave={(e) => {
-          if (activeHandle !== handleType) {
-            e.currentTarget.style.transform = 'scale(1)';
+          if (!isActive) {
+            e.currentTarget.style.transform = 'scale(1.2)';
+            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.15), 0 4px 12px rgba(0, 0, 0, 0.25)';
           }
         }}
-      />
+        onMouseLeave={(e) => {
+          if (!isActive) {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+          }
+        }}
+      >
+        {/* Handle center dot for better visibility */}
+        <div
+          className="absolute inset-0 flex items-center justify-center"
+          style={{
+            width: '4px',
+            height: '4px',
+            backgroundColor: 'white',
+            borderRadius: '50%',
+            margin: 'auto',
+          }}
+        />
+      </div>
     );
   };
 
   /**
-   * Renders the bounding box
+   * Renders the bounding box with modern styling
    */
   const renderBoundingBox = () => {
     const { x, y, width, height, rotation } = virtualElement;
@@ -158,21 +178,39 @@ export default function TransformControls({ elements, zoom }: TransformControlsP
 
     return (
       <div
-        className="bounding-box"
+        className="bounding-box pointer-events-none box-border"
         style={{
           position: 'absolute',
           left: x,
           top: y,
           width,
           height,
-          border: '2px solid #3b82f6',
-          borderRadius: 2,
-          pointerEvents: 'none',
-          boxSizing: 'border-box',
+          border: '2px solid var(--primary)',
+          borderRadius: '2px',
+          boxShadow: '0 0 0 1px rgba(37, 99, 235, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
           transformOrigin: 'center',
           transform: `rotate(${rotation}rad)`,
+          backgroundColor: 'rgba(37, 99, 235, 0.02)',
         }}
-      />
+      >
+        {/* Corner indicators */}
+        <div
+          className="absolute w-2 h-2 bg-[var(--primary)] border border-white rounded-sm"
+          style={{ top: '-5px', left: '-5px' }}
+        />
+        <div
+          className="absolute w-2 h-2 bg-[var(--primary)] border border-white rounded-sm"
+          style={{ top: '-5px', right: '-5px' }}
+        />
+        <div
+          className="absolute w-2 h-2 bg-[var(--primary)] border border-white rounded-sm"
+          style={{ bottom: '-5px', left: '-5px' }}
+        />
+        <div
+          className="absolute w-2 h-2 bg-[var(--primary)] border border-white rounded-sm"
+          style={{ bottom: '-5px', right: '-5px' }}
+        />
+      </div>
     );
   };
 
@@ -248,26 +286,30 @@ export default function TransformControls({ elements, zoom }: TransformControlsP
         )}
       </div>
 
-      {/* Size display */}
+      {/* Modern size display */}
       <div
+        className="pointer-events-none backdrop-blur-sm border border-[var(--border-primary)] rounded-md px-2 py-1 font-semibold text-xs"
         style={{
           position: 'absolute',
           left: virtualElement.x + virtualElement.width / 2,
-          top: virtualElement.y - 25 / zoom,
+          top: virtualElement.y - 28 / zoom,
           transform: 'translateX(-50%)',
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          color: 'white',
-          padding: `${4 / zoom}px ${8 / zoom}px`,
-          borderRadius: 4 / zoom,
-          fontSize: 12 / zoom,
-          fontWeight: 'bold',
+          backgroundColor: 'var(--surface-elevated)',
+          color: 'var(--text-primary)',
+          fontSize: Math.max(11 / zoom, 10),
           whiteSpace: 'nowrap',
-          pointerEvents: 'none',
+          boxShadow: 'var(--shadow)',
         }}
       >
-        {Math.round(virtualElement.width)} × {Math.round(virtualElement.height)}
-        {virtualElement.rotation !== 0 &&
-          ` • ${Math.round((virtualElement.rotation * 180) / Math.PI)}°`}
+        <span style={{ color: 'var(--text-secondary)' }}>Size:</span>{' '}
+        <span style={{ color: 'var(--primary)' }}>{Math.round(virtualElement.width)} × {Math.round(virtualElement.height)}</span>
+        {virtualElement.rotation !== 0 && (
+          <>
+            {' • '}
+            <span style={{ color: 'var(--text-secondary)' }}>Rotation:</span>{' '}
+            <span style={{ color: 'var(--accent)' }}>{Math.round((virtualElement.rotation * 180) / Math.PI)}°</span>
+          </>
+        )}
       </div>
     </div>
   );

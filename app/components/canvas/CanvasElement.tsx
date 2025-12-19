@@ -197,34 +197,53 @@ export default function CanvasElement({ element, isSelected, zoom }: CanvasEleme
   return (
     <div
       data-element-id={element.id}
-      className={`canvas-element ${isSelected ? 'selected' : ''} ${
+      className={`canvas-element transition-all duration-200 ease-out ${isSelected ? 'selected' : ''} ${
         element.locked ? 'locked' : ''
-      }`}
+      } ${element.locked ? 'opacity-75' : ''}`}
       style={{
         position: 'absolute',
-        outline: isSelected ? '2px solid #3b82f6' : 'none',
+        outline: isSelected ? '2px solid var(--primary)' : 'none',
         outlineOffset: '2px',
+        boxShadow: isSelected
+          ? '0 0 0 4px rgba(37, 99, 235, 0.1), 0 4px 12px rgba(0, 0, 0, 0.15)'
+          : element.locked
+          ? '0 2px 8px rgba(0, 0, 0, 0.1)'
+          : 'none',
+        borderRadius: '2px',
+        transform: `scale(${isSelected ? 1.01 : 1})`,
+        cursor: element.locked ? 'not-allowed' : 'pointer',
       }}
     >
       {renderElement()}
 
-      {/* Locked indicator */}
+      {/* Modern locked indicator */}
       {element.locked && (
         <div
+          className="absolute top-2 right-2 px-2 py-1 text-xs font-semibold rounded backdrop-blur-sm"
           style={{
-            position: 'absolute',
-            top: 4,
-            right: 4,
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            color: 'white',
-            padding: '2px 6px',
-            borderRadius: 4,
-            fontSize: 10,
-            fontWeight: 'bold',
+            background: 'var(--backdrop-overlay)',
+            color: 'var(--warning)',
+            border: '1px solid var(--warning)',
+            fontSize: '10px',
+            lineHeight: '1',
+            minWidth: '48px',
+            textAlign: 'center',
           }}
         >
           LOCKED
         </div>
+      )}
+
+      {/* Hover effect for unlocked elements */}
+      {!element.locked && (
+        <div
+          className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-150 pointer-events-none"
+          style={{
+            border: '1px solid var(--primary)',
+            borderRadius: '2px',
+            backgroundColor: 'rgba(37, 99, 235, 0.02)',
+          }}
+        />
       )}
     </div>
   );

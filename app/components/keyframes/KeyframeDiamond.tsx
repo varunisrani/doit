@@ -91,7 +91,7 @@ export const KeyframeDiamond: React.FC<KeyframeDiamondProps> = ({
 
   return (
     <div
-      className="absolute"
+      className="absolute group"
       style={{
         left: `${position}px`,
         top: '50%',
@@ -104,47 +104,79 @@ export const KeyframeDiamond: React.FC<KeyframeDiamondProps> = ({
       {/* Keyframe Diamond */}
       <div
         className={`
-          w-3 h-3 cursor-move transition-all
-          ${selected ? 'scale-125' : 'scale-100'}
+          w-4 h-4 cursor-move transition-all duration-200 transform
+          ${selected ? 'scale-125' : 'scale-100 hover:scale-110'}
           ${isDragging ? 'scale-150' : ''}
         `}
         onMouseDown={handleMouseDown}
         onContextMenu={handleContextMenu}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onSelect(keyframe.id);
+          } else if (e.key === 'Delete' || e.key === 'Backspace') {
+            e.preventDefault();
+            onDelete(keyframe.id);
+          }
+        }}
+        aria-label={`Keyframe at ${formatTime(keyframe.time)} for ${keyframe.property}`}
+        aria-selected={selected}
       >
-        <svg viewBox="0 0 12 12" className="w-full h-full">
+        <svg viewBox="0 0 16 16" className="w-full h-full drop-shadow-sm">
           <path
-            d="M 6 0 L 12 6 L 6 12 L 0 6 Z"
+            d="M 8 2 L 14 8 L 8 14 L 2 8 Z"
             fill={selected ? '#3b82f6' : '#8b5cf6'}
-            stroke={selected ? '#1d4ed8' : '#6d28d9'}
-            strokeWidth="1"
-            className="transition-colors"
+            stroke={selected ? '#1e40af' : '#6d28d9'}
+            strokeWidth="1.5"
+            className="transition-all duration-200"
+            filter={selected ? 'drop-shadow(0 0 4px rgba(59, 130, 246, 0.5)))' : 'none'}
           />
+          {selected && (
+            <circle cx="8" cy="8" r="1.5" fill="white" opacity="0.8" />
+          )}
         </svg>
       </div>
 
       {/* Tooltip */}
       {showTooltip && (
         <div
-          className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2
-                     bg-gray-900 text-white text-xs rounded px-2 py-1.5
-                     whitespace-nowrap pointer-events-none shadow-lg z-50"
+          className="absolute left-1/2 -translate-x-1/2 bottom-full mb-3
+                     bg-zinc-900 text-white text-xs rounded-lg px-3 py-2.5
+                     whitespace-nowrap pointer-events-none shadow-xl z-50
+                     border border-zinc-700 backdrop-blur-sm"
         >
-          <div className="font-semibold mb-0.5">
+          <div className="font-semibold mb-1 text-blue-400">
             {formatTime(keyframe.time)}
           </div>
-          <div className="text-gray-300">
-            Value: {formatValue(keyframe.value, keyframe.property)}
+          <div className="text-zinc-300 text-xs">
+            Value: <span className="font-medium text-zinc-200">{formatValue(keyframe.value, keyframe.property)}</span>
           </div>
-          <div className="text-gray-400 text-[10px] mt-0.5">
+          <div className="text-zinc-400 text-[10px] mt-1 italic">
             {easingLabels[keyframe.easing]}
           </div>
           {/* Tooltip Arrow */}
           <div
             className="absolute left-1/2 -translate-x-1/2 top-full
                        w-0 h-0 border-l-4 border-r-4 border-t-4
-                       border-transparent border-t-gray-900"
+                       border-transparent border-t-zinc-700"
           />
         </div>
+      )}
+
+      {/* Focus Ring for Accessibility */}
+      {selected && (
+        <div
+          className="absolute inset-0 w-6 h-6 -m-1 rounded-full
+                     border-2 border-blue-400 border-opacity-50
+                     pointer-events-none animate-pulse"
+          style={{
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+          }}
+        />
       )}
     </div>
   );

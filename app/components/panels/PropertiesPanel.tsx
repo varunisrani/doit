@@ -6,36 +6,63 @@ import { useSelectionStore } from '@/app/lib/store/selectionStore';
 import { TransformSection } from './TransformSection';
 import { StyleSection } from './StyleSection';
 import { TextSection } from './TextSection';
-import { ChevronDown, ChevronRight, Info } from 'lucide-react';
+import { ChevronDown, ChevronRight, Info, Lock, Unlock, Eye, EyeOff, Move, Paintbrush, Type as TypeIcon, Image as ImageIcon, Shapes } from 'lucide-react';
+import { Button } from '@/app/components/ui/Button';
+import { IconButton } from '@/app/components/ui/IconButton';
+import { Input } from '@/app/components/ui/Input';
 import type { TextElement } from '@/app/types/elements';
 
 interface CollapsibleSectionProps {
   title: string;
   defaultOpen?: boolean;
   children: React.ReactNode;
+  icon?: React.ReactNode;
+  badge?: string | number;
 }
 
 const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
   title,
   defaultOpen = true,
   children,
+  icon,
+  badge,
 }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="border-b border-zinc-800">
+    <div className="border-b border-[var(--border-primary)]">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-4 py-3 hover:bg-zinc-800/50 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-3 hover:bg-[var(--surface-hover)] transition-all duration-200 group"
       >
-        <span className="text-sm font-semibold text-white">{title}</span>
-        {isOpen ? (
-          <ChevronDown className="w-4 h-4 text-zinc-400" />
-        ) : (
-          <ChevronRight className="w-4 h-4 text-zinc-400" />
-        )}
+        <div className="flex items-center gap-2">
+          {icon && (
+            <span className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+              {icon}
+            </span>
+          )}
+          <span className="text-sm font-semibold text-[var(--text-primary)]">{title}</span>
+          {badge && (
+            <span className="px-2 py-0.5 text-xs bg-[var(--primary)]/10 text-[var(--primary)] rounded-full font-medium">
+              {badge}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <ChevronDown
+            className={`w-4 h-4 text-[var(--text-secondary)] transition-transform duration-200 ${
+              isOpen ? 'rotate-180' : ''
+            }`}
+          />
+        </div>
       </button>
-      {isOpen && <div className="px-4 py-3">{children}</div>}
+      <div
+        className={`overflow-hidden transition-all duration-200 ${
+          isOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        <div className="px-4 py-3 bg-[var(--surface-elevated)]/50">{children}</div>
+      </div>
     </div>
   );
 };
@@ -94,12 +121,15 @@ export const PropertiesPanel: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-zinc-900 border-l border-zinc-800 w-80">
+    <div className="flex flex-col h-full bg-[var(--surface)] border-l border-[var(--border-primary)] w-80 shadow-lg">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-zinc-800">
-        <h2 className="text-sm font-semibold text-white">Properties</h2>
+      <div className="flex items-center justify-between p-4 border-b border-[var(--border-primary)] bg-[var(--surface-elevated)]">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-[var(--primary)]"></div>
+          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Properties</h2>
+        </div>
         {selectedIds.length > 0 && (
-          <span className="text-xs text-zinc-500">
+          <span className="px-2 py-1 text-xs bg-[var(--primary)]/10 text-[var(--primary)] rounded-full font-medium">
             {selectedIds.length} selected
           </span>
         )}
@@ -109,31 +139,41 @@ export const PropertiesPanel: React.FC = () => {
       <div className="flex-1 overflow-y-auto">
         {selectedIds.length === 0 ? (
           // No selection state
-          <div className="flex flex-col items-center justify-center h-full text-center p-6">
-            <Info className="w-12 h-12 text-zinc-600 mb-3" />
-            <p className="text-sm text-zinc-500 mb-2">No element selected</p>
-            <p className="text-xs text-zinc-600">
+          <div className="flex flex-col items-center justify-center h-full text-center p-8">
+            <div className="w-16 h-16 rounded-full bg-[var(--surface-hover)] flex items-center justify-center mb-4">
+              <Info className="w-8 h-8 text-[var(--text-secondary)]" />
+            </div>
+            <p className="text-sm font-medium text-[var(--text-secondary)] mb-2">No element selected</p>
+            <p className="text-xs text-[var(--text-tertiary)] max-w-[200px]">
               Select an element on the canvas to view and edit its properties
             </p>
           </div>
         ) : multipleSelected ? (
           // Multiple selection state
           <div className="p-4">
-            <div className="mb-4 p-3 bg-blue-900/20 border border-blue-800 rounded-md">
-              <p className="text-xs text-blue-400">
-                {selectedIds.length} elements selected. Changes will apply to all selected elements.
-              </p>
+            <div className="mb-6 p-4 bg-[var(--info-bg)] border border-[var(--info)]/30 rounded-lg">
+              <div className="flex items-start gap-3">
+                <div className="w-2 h-2 rounded-full bg-[var(--info)] mt-1.5"></div>
+                <div>
+                  <p className="text-sm font-medium text-[var(--info)] mb-1">
+                    Multiple Selection
+                  </p>
+                  <p className="text-xs text-[var(--text-secondary)]">
+                    {selectedIds.length} elements selected. Changes will apply to all selected elements.
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Show common properties for multiple selection */}
-            <CollapsibleSection title="Transform" defaultOpen={true}>
+            <CollapsibleSection title="Transform" defaultOpen={true} badge="Common">
               <TransformSection
                 transform={selectedElement!.transform}
                 onUpdate={handleTransformUpdate}
               />
             </CollapsibleSection>
 
-            <CollapsibleSection title="Style" defaultOpen={true}>
+            <CollapsibleSection title="Style" defaultOpen={true} badge="Common">
               <StyleSection
                 style={selectedElement!.style}
                 onUpdate={handleStyleUpdate}
@@ -144,34 +184,39 @@ export const PropertiesPanel: React.FC = () => {
           // Single selection state
           <div>
             {/* Element Info */}
-            <div className="p-4 border-b border-zinc-800">
-              <div className="space-y-2">
+            <div className="p-4 border-b border-[var(--border-primary)] bg-[var(--surface-elevated)]/30">
+              <div className="space-y-4">
                 <div>
-                  <label className="text-xs text-zinc-400">Name</label>
-                  <input
-                    type="text"
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-2">
+                    Element Name
+                  </label>
+                  <Input
                     value={selectedElement.name}
                     onChange={(e) => updateElement(selectedElement.id, { name: e.target.value })}
-                    className="w-full mt-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter element name..."
+                    className="text-sm"
                   />
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-zinc-400">Type</span>
-                  <span className="text-xs text-white font-medium capitalize">
-                    {selectedElement.type}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-zinc-400">ID</span>
-                  <span className="text-xs text-zinc-500 font-mono">
-                    {selectedElement.id.slice(0, 8)}...
-                  </span>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 bg-[var(--surface)] rounded-lg border border-[var(--border-primary)]">
+                    <span className="text-xs text-[var(--text-secondary)] block mb-1">Type</span>
+                    <span className="text-sm font-medium text-[var(--text-primary)] capitalize">
+                      {selectedElement.type}
+                    </span>
+                  </div>
+                  <div className="p-3 bg-[var(--surface)] rounded-lg border border-[var(--border-primary)]">
+                    <span className="text-xs text-[var(--text-secondary)] block mb-1">ID</span>
+                    <span className="text-xs font-mono text-[var(--text-tertiary)]">
+                      {selectedElement.id.slice(0, 8)}...
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Transform Section */}
-            <CollapsibleSection title="Transform" defaultOpen={true}>
+            <CollapsibleSection title="Transform" defaultOpen={true} icon={<Move className="w-4 h-4" />}>
               <TransformSection
                 transform={selectedElement.transform}
                 onUpdate={handleTransformUpdate}
@@ -180,7 +225,7 @@ export const PropertiesPanel: React.FC = () => {
             </CollapsibleSection>
 
             {/* Style Section */}
-            <CollapsibleSection title="Style" defaultOpen={true}>
+            <CollapsibleSection title="Style" defaultOpen={true} icon={<Paintbrush className="w-4 h-4" />}>
               <StyleSection
                 style={selectedElement.style}
                 onUpdate={handleStyleUpdate}
@@ -190,7 +235,7 @@ export const PropertiesPanel: React.FC = () => {
 
             {/* Text Section (only for text elements) */}
             {selectedElement.type === 'text' && (
-              <CollapsibleSection title="Text Properties" defaultOpen={true}>
+              <CollapsibleSection title="Text Properties" defaultOpen={true} icon={<TypeIcon className="w-4 h-4" />}>
                 <TextSection
                   element={selectedElement as TextElement}
                   onUpdate={handleTextUpdate}
@@ -201,11 +246,13 @@ export const PropertiesPanel: React.FC = () => {
 
             {/* Image Section (only for image elements) */}
             {selectedElement.type === 'image' && (
-              <CollapsibleSection title="Image Properties" defaultOpen={false}>
-                <div className="space-y-3">
+              <CollapsibleSection title="Image Properties" defaultOpen={false} icon={<ImageIcon className="w-4 h-4" />}>
+                <div className="space-y-4">
                   <div>
-                    <label className="text-xs text-zinc-400">Source</label>
-                    <div className="mt-1 p-2 bg-zinc-800 rounded-md">
+                    <label className="block text-xs font-medium text-[var(--text-secondary)] mb-2">
+                      Preview
+                    </label>
+                    <div className="mt-2 p-3 bg-[var(--surface)] rounded-lg border border-[var(--border-primary)] overflow-hidden">
                       <img
                         src={(selectedElement as any).src}
                         alt={selectedElement.name}
@@ -213,14 +260,18 @@ export const PropertiesPanel: React.FC = () => {
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div>
-                      <span className="text-zinc-400">Width:</span>
-                      <span className="ml-2 text-white">{(selectedElement as any).naturalWidth}px</span>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 bg-[var(--surface)] rounded-lg border border-[var(--border-primary)]">
+                      <span className="text-xs text-[var(--text-secondary)] block mb-1">Width</span>
+                      <span className="text-sm font-medium text-[var(--text-primary)]">
+                        {(selectedElement as any).naturalWidth}px
+                      </span>
                     </div>
-                    <div>
-                      <span className="text-zinc-400">Height:</span>
-                      <span className="ml-2 text-white">{(selectedElement as any).naturalHeight}px</span>
+                    <div className="p-3 bg-[var(--surface)] rounded-lg border border-[var(--border-primary)]">
+                      <span className="text-xs text-[var(--text-secondary)] block mb-1">Height</span>
+                      <span className="text-sm font-medium text-[var(--text-primary)]">
+                        {(selectedElement as any).naturalHeight}px
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -229,22 +280,24 @@ export const PropertiesPanel: React.FC = () => {
 
             {/* Shape Section (only for shape elements) */}
             {selectedElement.type === 'shape' && (
-              <CollapsibleSection title="Shape Properties" defaultOpen={false}>
-                <div className="space-y-3">
-                  <div>
-                    <label className="text-xs text-zinc-400 block mb-2">Shape Type</label>
-                    <span className="text-sm text-white capitalize">
+              <CollapsibleSection title="Shape Properties" defaultOpen={false} icon={<Shapes className="w-4 h-4" />}>
+                <div className="space-y-4">
+                  <div className="p-3 bg-[var(--surface)] rounded-lg border border-[var(--border-primary)]">
+                    <span className="text-xs text-[var(--text-secondary)] block mb-1">Shape Type</span>
+                    <span className="text-sm font-medium text-[var(--text-primary)] capitalize">
                       {(selectedElement as any).shapeType}
                     </span>
                   </div>
                   <div>
-                    <label className="text-xs text-zinc-400 block mb-2">Fill Color</label>
-                    <div className="flex items-center gap-2">
+                    <label className="block text-xs font-medium text-[var(--text-secondary)] mb-2">
+                      Fill Color
+                    </label>
+                    <div className="flex items-center gap-3 p-3 bg-[var(--surface)] rounded-lg border border-[var(--border-primary)]">
                       <div
-                        className="w-8 h-8 rounded border-2 border-zinc-600"
+                        className="w-10 h-10 rounded-lg border-2 border-[var(--border-secondary)] shadow-sm"
                         style={{ backgroundColor: (selectedElement as any).fillColor }}
                       />
-                      <span className="text-sm text-white font-mono">
+                      <span className="text-sm font-mono text-[var(--text-primary)]">
                         {(selectedElement as any).fillColor}
                       </span>
                     </div>
@@ -253,29 +306,27 @@ export const PropertiesPanel: React.FC = () => {
               </CollapsibleSection>
             )}
 
-            {/* Visibility and Lock */}
-            <div className="p-4 border-t border-zinc-800">
-              <div className="grid grid-cols-2 gap-2">
-                <button
+            {/* Visibility and Lock Controls */}
+            <div className="p-4 border-t border-[var(--border-primary)] bg-[var(--surface-elevated)]/50">
+              <div className="grid grid-cols-2 gap-3">
+                <Button
                   onClick={() => updateElement(selectedElement.id, { visible: !selectedElement.visible })}
-                  className={`px-3 py-2 text-xs font-medium rounded-md transition-colors ${
-                    selectedElement.visible
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
-                  }`}
+                  variant={selectedElement.visible ? 'primary' : 'secondary'}
+                  size="sm"
+                  leftIcon={selectedElement.visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                  className="w-full"
                 >
                   {selectedElement.visible ? 'Visible' : 'Hidden'}
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => updateElement(selectedElement.id, { locked: !selectedElement.locked })}
-                  className={`px-3 py-2 text-xs font-medium rounded-md transition-colors ${
-                    selectedElement.locked
-                      ? 'bg-red-600 text-white'
-                      : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
-                  }`}
+                  variant={selectedElement.locked ? 'danger' : 'secondary'}
+                  size="sm"
+                  leftIcon={selectedElement.locked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+                  className="w-full"
                 >
                   {selectedElement.locked ? 'Locked' : 'Unlocked'}
-                </button>
+                </Button>
               </div>
             </div>
           </div>

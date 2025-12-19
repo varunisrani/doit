@@ -50,18 +50,18 @@ export default function ComponentsDemo() {
   ];
 
   return (
-    <div className="min-h-screen bg-zinc-900 text-white p-8">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--text-primary)] p-8">
       <div className="max-w-6xl mx-auto space-y-12">
         {/* Header */}
         <div>
           <h1 className="text-4xl font-bold mb-2">Video Editor UI Components</h1>
-          <p className="text-zinc-400">A comprehensive showcase of all available components</p>
+          <p className="text-[var(--text-secondary)]">A comprehensive showcase of all available components</p>
         </div>
 
         {/* Buttons Section */}
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold">Buttons</h2>
-          <div className="bg-zinc-800 p-6 rounded-lg border border-zinc-700">
+          <div className="bg-[var(--surface)] p-6 rounded-lg border border-[var(--border-primary)]">
             <div className="space-y-4">
               <div className="flex gap-3 flex-wrap">
                 <Button variant="primary">Primary Button</Button>
@@ -82,7 +82,7 @@ export default function ComponentsDemo() {
         {/* Icon Buttons Section */}
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold">Icon Buttons</h2>
-          <div className="bg-zinc-800 p-6 rounded-lg border border-zinc-700">
+          <div className="bg-[var(--surface)] p-6 rounded-lg border border-[var(--border-primary)]">
             <div className="flex gap-3 flex-wrap items-center">
               <Tooltip content="Play video" position="top">
                 <IconButton
@@ -114,7 +114,7 @@ export default function ComponentsDemo() {
         {/* Sliders Section */}
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold">Sliders</h2>
-          <div className="bg-zinc-800 p-6 rounded-lg border border-zinc-700 space-y-6">
+          <div className="bg-[var(--surface)] p-6 rounded-lg border border-[var(--border-primary)] space-y-6">
             <Slider
               value={volume}
               onChange={setVolume}
@@ -137,7 +137,7 @@ export default function ComponentsDemo() {
         {/* Dropdowns & Color Pickers */}
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold">Dropdowns & Color Pickers</h2>
-          <div className="bg-zinc-800 p-6 rounded-lg border border-zinc-700">
+          <div className="bg-[var(--surface)] p-6 rounded-lg border border-[var(--border-primary)]">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Dropdown
                 options={resolutionOptions}
@@ -162,7 +162,7 @@ export default function ComponentsDemo() {
         {/* Inputs Section */}
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold">Inputs</h2>
-          <div className="bg-zinc-800 p-6 rounded-lg border border-zinc-700 space-y-4">
+          <div className="bg-[var(--surface)] p-6 rounded-lg border border-[var(--border-primary)] space-y-4">
             <Input
               label="Video Title"
               placeholder="Enter video title..."
@@ -196,7 +196,7 @@ export default function ComponentsDemo() {
         {/* Tabs Section */}
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold">Tabs</h2>
-          <div className="bg-zinc-800 p-6 rounded-lg border border-zinc-700">
+          <div className="bg-[var(--surface)] p-6 rounded-lg border border-[var(--border-primary)]">
             <Tabs defaultValue="video">
               <TabsList>
                 <TabsTrigger value="video">Video</TabsTrigger>
@@ -208,7 +208,7 @@ export default function ComponentsDemo() {
               <TabsContent value="video">
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Video Settings</h3>
-                  <p className="text-zinc-400">
+                  <p className="text-[var(--text-secondary)]">
                     Configure video properties like resolution, frame rate, and codec.
                   </p>
                   <Dropdown
@@ -223,7 +223,7 @@ export default function ComponentsDemo() {
               <TabsContent value="audio">
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Audio Settings</h3>
-                  <p className="text-zinc-400">
+                  <p className="text-[var(--text-secondary)]">
                     Adjust audio levels, add music, and configure sound effects.
                   </p>
                   <Slider
@@ -238,7 +238,7 @@ export default function ComponentsDemo() {
               <TabsContent value="effects">
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Effects & Filters</h3>
-                  <p className="text-zinc-400">
+                  <p className="text-[var(--text-secondary)]">
                     Apply visual effects, transitions, and filters to your video.
                   </p>
                   <Slider
@@ -253,7 +253,7 @@ export default function ComponentsDemo() {
               <TabsContent value="export">
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Export Settings</h3>
-                  <p className="text-zinc-400">
+                  <p className="text-[var(--text-secondary)]">
                     Choose export format, quality, and destination.
                   </p>
                   <Button variant="primary" onClick={() => setIsModalOpen(true)}>
@@ -268,7 +268,7 @@ export default function ComponentsDemo() {
         {/* Progress Bars Section */}
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold">Progress Indicators</h2>
-          <div className="bg-zinc-800 p-6 rounded-lg border border-zinc-700 space-y-6">
+          <div className="bg-[var(--surface)] p-6 rounded-lg border border-[var(--border-primary)] space-y-6">
             <ProgressBar
               value={exportProgress}
               label="Exporting Video"
@@ -320,7 +320,7 @@ export default function ComponentsDemo() {
               label="Export Progress"
               showLabel
             />
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm text-[var(--text-secondary)]">
               Your video is being exported. This may take a few minutes depending on the length and quality settings.
             </p>
           </div>

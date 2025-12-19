@@ -256,7 +256,7 @@ export default function EditorCanvas({
   return (
     <div
       ref={canvasRef}
-      className={`relative overflow-hidden bg-gray-900 ${className}`}
+      className={`canvas-container relative overflow-hidden bg-[var(--background)] ${className}`}
       style={{
         width: '100%',
         height: '100%',
@@ -273,6 +273,7 @@ export default function EditorCanvas({
 
       {/* Canvas content */}
       <div
+        className="canvas transition-transform duration-200 ease-out"
         style={{
           transform: `translate(${panX}px, ${panY}px) scale(${zoom})`,
           transformOrigin: '0 0',
@@ -281,15 +282,16 @@ export default function EditorCanvas({
           height: project.height,
         }}
       >
-        {/* Canvas background */}
+        {/* Canvas background with subtle border */}
         <div
+          className="absolute inset-0 border border-[var(--canvas-border)]"
           style={{
             width: '100%',
             height: '100%',
             backgroundColor: project.backgroundColor,
-            position: 'absolute',
             top: 0,
             left: 0,
+            boxShadow: zoom > 1 ? '0 0 20px rgba(0, 0, 0, 0.3)' : 'none',
           }}
         />
 
@@ -319,22 +321,56 @@ export default function EditorCanvas({
         />
       )}
 
-      {/* Info overlay */}
-      <div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-3 py-2 rounded text-sm font-mono">
-        <div>Zoom: {(zoom * 100).toFixed(0)}%</div>
-        <div>
-          Pan: ({panX.toFixed(0)}, {panY.toFixed(0)})
+      {/* Info overlay with modern design */}
+      <div
+        className="panel absolute top-4 right-4 text-[var(--text-primary)] px-4 py-3 text-sm font-mono backdrop-blur-sm"
+        style={{
+          background: 'var(--backdrop-overlay)',
+          border: '1px solid var(--border-primary)',
+        }}
+      >
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-[var(--text-secondary)]">Zoom:</span>
+          <span className="text-[var(--text-primary)] font-semibold">{(zoom * 100).toFixed(0)}%</span>
         </div>
-        <div>Elements: {allElements.length}</div>
-        <div>Selected: {selectedElements.length}</div>
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-[var(--text-secondary)]">Pan:</span>
+          <span className="text-[var(--text-primary)] font-semibold">({panX.toFixed(0)}, {panY.toFixed(0)})</span>
+        </div>
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-[var(--text-secondary)]">Elements:</span>
+          <span className="text-[var(--text-primary)] font-semibold">{allElements.length}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[var(--text-secondary)]">Selected:</span>
+          <span className="text-[var(--primary)] font-semibold">{selectedElements.length}</span>
+        </div>
       </div>
 
-      {/* Instructions */}
-      <div className="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-3 py-2 rounded text-xs">
-        <div>Mouse Wheel: Zoom</div>
-        <div>Middle Mouse / Space+Drag: Pan</div>
-        <div>Shift+Click: Multi-select</div>
-        <div>Drag: Box select</div>
+      {/* Instructions with modern tooltip design */}
+      <div
+        className="panel absolute bottom-4 left-4 text-[var(--text-primary)] px-4 py-3 text-xs backdrop-blur-sm"
+        style={{
+          background: 'var(--backdrop-overlay)',
+          border: '1px solid var(--border-primary)',
+        }}
+      >
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-[var(--text-secondary)]">Mouse Wheel:</span>
+          <span className="text-[var(--text-primary)]">Zoom</span>
+        </div>
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-[var(--text-secondary)]">Middle Mouse / Space+Drag:</span>
+          <span className="text-[var(--text-primary)]">Pan</span>
+        </div>
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-[var(--text-secondary)]">Shift+Click:</span>
+          <span className="text-[var(--text-primary)]">Multi-select</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[var(--text-secondary)]">Drag:</span>
+          <span className="text-[var(--text-primary)]">Box select</span>
+        </div>
       </div>
     </div>
   );

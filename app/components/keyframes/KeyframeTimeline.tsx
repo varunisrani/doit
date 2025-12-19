@@ -135,17 +135,17 @@ export const KeyframeTimeline: React.FC<KeyframeTimelineProps> = ({
   const currentTimePosition = currentTime * pixelsPerMs;
 
   return (
-    <div className="flex flex-col bg-gray-900 rounded-lg overflow-hidden">
+    <div className="flex flex-col bg-zinc-900 rounded-lg overflow-hidden border border-zinc-700">
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-2 bg-gray-800 border-b border-gray-700">
+      <div className="flex items-center gap-4 px-6 py-3 bg-zinc-800 border-b border-zinc-700">
         <div className="text-sm font-semibold text-white">Keyframe Timeline</div>
-        <div className="text-xs text-gray-400">
-          Click on a track to add keyframe | Right-click to delete
+        <div className="text-xs text-zinc-400">
+          Click to add • Drag to move • Right-click to delete
         </div>
       </div>
 
       {/* Timeline Tracks */}
-      <div className="relative overflow-x-auto overflow-y-auto max-h-96" ref={timelineRef}>
+      <div className="relative overflow-x-auto overflow-y-auto max-h-96 bg-zinc-900/50" ref={timelineRef}>
         <div style={{ width: trackWidth }}>
           {animatableProperties.map((property) => {
             const propertyKeyframes = keyframesByProperty[property];
@@ -156,25 +156,33 @@ export const KeyframeTimeline: React.FC<KeyframeTimelineProps> = ({
               <div
                 key={property}
                 className={`
-                  relative h-12 border-b border-gray-800
-                  transition-colors cursor-crosshair
-                  ${isSelected ? 'bg-gray-800/50' : 'bg-gray-900'}
+                  relative h-14 border-b border-zinc-800
+                  transition-colors duration-200 cursor-crosshair
+                  ${isSelected ? 'bg-zinc-800/50' : 'bg-zinc-900/30'}
                   ${hasKeyframes ? 'bg-opacity-100' : 'bg-opacity-50'}
-                  hover:bg-gray-800/30
+                  hover:bg-zinc-800/40 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500
                 `}
                 onClick={(e) => handleTrackClick(e, property)}
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    handleTrackClick(e as any, property);
+                  }
+                }}
+                role="button"
+                aria-label={`Add keyframe to ${propertyConfig[property].label}`}
               >
                 {/* Property Label */}
                 <div
                   className="absolute left-0 top-0 h-full flex items-center
-                             px-3 bg-gray-800 border-r border-gray-700 z-10
-                             pointer-events-none"
-                  style={{ width: '120px' }}
+                             px-4 bg-zinc-800 border-r border-zinc-700 z-10
+                             pointer-events-none transition-colors duration-200"
+                  style={{ width: '140px' }}
                 >
                   <span
                     className={`
-                      text-xs font-medium
-                      ${hasKeyframes ? 'text-white' : 'text-gray-500'}
+                      text-xs font-medium uppercase tracking-wide transition-colors
+                      ${hasKeyframes ? 'text-white' : 'text-zinc-500'}
                     `}
                   >
                     {propertyConfig[property].label}
@@ -182,12 +190,29 @@ export const KeyframeTimeline: React.FC<KeyframeTimelineProps> = ({
                 </div>
 
                 {/* Timeline Grid */}
-                <div className="absolute inset-0" style={{ marginLeft: '120px' }}>
+                <div className="absolute inset-0" style={{ marginLeft: '140px' }}>
+                  {/* Grid Lines */}
+                  <div className="absolute inset-0 opacity-20">
+                    {Array.from({ length: Math.ceil(duration / 1000) + 1 }).map((_, i) => {
+                      const time = i * 1000;
+                      const position = time * pixelsPerMs;
+                      return (
+                        <div
+                          key={i}
+                          className="absolute top-0 bottom-0 w-px bg-zinc-600"
+                          style={{ left: `${position}px` }}
+                        />
+                      );
+                    })}
+                  </div>
+
                   {/* Current Time Indicator */}
                   <div
-                    className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-20 pointer-events-none"
+                    className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-20 pointer-events-none transition-all duration-150"
                     style={{ left: `${currentTimePosition}px` }}
-                  />
+                  >
+                    <div className="absolute -top-1 -left-1 w-2 h-2 bg-red-500 rounded-full" />
+                  </div>
 
                   {/* Keyframes */}
                   {propertyKeyframes.map((keyframe) => (
@@ -211,8 +236,8 @@ export const KeyframeTimeline: React.FC<KeyframeTimelineProps> = ({
 
       {/* Time Ruler */}
       <div
-        className="relative h-8 bg-gray-800 border-t border-gray-700 overflow-hidden"
-        style={{ marginLeft: '120px' }}
+        className="relative h-10 bg-zinc-800 border-t border-zinc-700 overflow-hidden"
+        style={{ marginLeft: '140px' }}
       >
         <div className="absolute inset-0 flex items-center" style={{ width: trackWidth }}>
           {/* Time Markers */}
@@ -222,10 +247,10 @@ export const KeyframeTimeline: React.FC<KeyframeTimelineProps> = ({
             return (
               <div
                 key={i}
-                className="absolute top-0 bottom-0 border-l border-gray-600"
+                className="absolute top-0 bottom-0 border-l border-zinc-600"
                 style={{ left: `${position}px` }}
               >
-                <span className="absolute top-1 left-1 text-[10px] text-gray-400">
+                <span className="absolute top-1 left-2 text-[10px] text-zinc-400 font-medium">
                   {i}s
                 </span>
               </div>
@@ -234,25 +259,27 @@ export const KeyframeTimeline: React.FC<KeyframeTimelineProps> = ({
 
           {/* Current Time Indicator */}
           <div
-            className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-20"
+            className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-20 transition-all duration-150"
             style={{ left: `${currentTimePosition}px` }}
-          />
+          >
+            <div className="absolute -top-1 -left-1 w-2 h-2 bg-red-500 rounded-full shadow-sm" />
+          </div>
         </div>
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-4 px-4 py-2 bg-gray-800 border-t border-gray-700 text-xs text-gray-400">
-        <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rotate-45 bg-purple-500" />
-          <span>Keyframe</span>
+      <div className="flex items-center gap-6 px-6 py-3 bg-zinc-800 border-t border-zinc-700 text-xs text-zinc-400">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rotate-45 bg-purple-500 rounded-sm" />
+          <span className="font-medium">Keyframe</span>
         </div>
-        <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rotate-45 bg-blue-500" />
-          <span>Selected</span>
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rotate-45 bg-blue-500 rounded-sm" />
+          <span className="font-medium">Selected</span>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <div className="w-0.5 h-3 bg-red-500" />
-          <span>Current Time</span>
+          <span className="font-medium">Current Time</span>
         </div>
       </div>
     </div>

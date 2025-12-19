@@ -1,67 +1,206 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { getRecentProjects, loadProject } from './lib/storage/localStorage';
+import { deserializeProjectData } from './lib/storage/serialization';
+import { useEditorStore } from './lib/store/editorStore';
+import { useCanvasStore } from './lib/store/canvasStore';
+import { useTimelineStore } from './lib/store/timelineStore';
+import { useSelectionStore } from './lib/store/selectionStore';
+import { Film, Clock, FolderOpen, Plus, ArrowRight } from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
+  const [recentProjects, setRecentProjects] = useState<Array<{
+    id: string;
+    name: string;
+    createdAt: number;
+    updatedAt: number;
+  }>>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [autoRedirect, setAutoRedirect] = useState(true);
+
+  const editorStore = useEditorStore();
+  const canvasStore = useCanvasStore();
+  const timelineStore = useTimelineStore();
+  const selectionStore = useSelectionStore();
 
   useEffect(() => {
-    // Redirect to editor page
-    const timer = setTimeout(() => {
-      router.push('/editor');
-    }, 3000);
+    // Load recent projects
+    const projects = getRecentProjects();
+    setRecentProjects(projects);
+    setIsLoading(false);
 
-    return () => clearTimeout(timer);
-  }, [router]);
+    // Only auto-redirect if no recent projects
+    if (projects.length === 0 && autoRedirect) {
+      const timer = setTimeout(() => {
+        router.push('/editor');
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [router, autoRedirect]);
+
+  const handleOpenProject = (projectId: string) => {
+    const projectData = loadProject(projectId);
+    if (!projectData) {
+      console.error('Failed to load project');
+      return;
+    }
+
+    const { settings, metadata, tracks, elements, assets } = deserializeProjectData(projectData);
+
+    editorStore.loadProjectData(settings, metadata, assets);
+    canvasStore.setElements(elements);
+    timelineStore.setTracks(tracks);
+    selectionStore.clearAll();
+
+    router.push('/editor');
+  };
+
+  const handleNewProject = () => {
+    editorStore.resetProject();
+    canvasStore.clearElements();
+    timelineStore.clearTimeline();
+    selectionStore.clearAll();
+    router.push('/editor');
+  };
+
+  const formatDate = (timestamp: number) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} minutes ago`;
+    if (diffHours < 24) return `${diffHours} hours ago`;
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <div className="high-contrast-panel p-8 text-center max-w-lg w-full">
-        {/* High Contrast Logo */}
-        <div className="mb-6">
-          <div className="w-16 h-16 high-contrast-button rounded flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+    <div className="min-h-screen bg-[var(--background)] flex items-center justify-center p-4">
+      <div className="max-w-2xl w-full">
+        {/* Logo and Title */}
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 bg-gradient-to-br from-[var(--primary)] to-[var(--accent)] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
+            <Film className="w-10 h-10 text-white" />
           </div>
+          <h1 className="text-4xl font-bold text-[var(--text-primary)] mb-2">
+            Video Editor Pro
+          </h1>
+          <p className="text-lg text-[var(--text-secondary)]">
+            Professional Video Editing Suite
+          </p>
         </div>
 
-        {/* Large, Clear Typography - No subtle gradients */}
-        <h1 className="high-contrast-text-large mb-4 text-primary tracking-tight">
-          Video Editor Pro
-        </h1>
-        <p className="high-contrast-text mb-8 text-secondary">
-          High Contrast Accessibility Video Editing Suite
-        </p>
+        {/* Quick Actions */}
+        <div className="grid grid-cols-2 gap-4 mb-8">
+          <button
+            onClick={handleNewProject}
+            className="group p-6 bg-[var(--surface)] border border-[var(--border-primary)] rounded-xl hover:border-[var(--primary)] hover:bg-[var(--surface-hover)] transition-all duration-200"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-[var(--primary)]/10 rounded-lg flex items-center justify-center group-hover:bg-[var(--primary)]/20 transition-colors">
+                <Plus className="w-6 h-6 text-[var(--primary)]" />
+              </div>
+              <div className="text-left">
+                <h3 className="text-lg font-semibold text-[var(--text-primary)]">New Project</h3>
+                <p className="text-sm text-[var(--text-secondary)]">Start from scratch</p>
+              </div>
+            </div>
+          </button>
 
-        {/* Large Clear Status Messages */}
-        <div className="space-y-4 mb-8">
-          <div className="status-message high-contrast-status">
-            <span className="text-lg font-bold">System Status: READY</span>
-          </div>
-          <div className="status-message high-contrast-status">
-            <span className="text-lg font-bold">Editor Engine: INITIALIZING</span>
-          </div>
-          <div className="status-message high-contrast-status warning">
-            <span className="text-lg font-bold">Media Pipeline: LOADING</span>
-          </div>
+          <button
+            onClick={() => router.push('/editor')}
+            className="group p-6 bg-[var(--surface)] border border-[var(--border-primary)] rounded-xl hover:border-[var(--primary)] hover:bg-[var(--surface-hover)] transition-all duration-200"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-[var(--accent)]/10 rounded-lg flex items-center justify-center group-hover:bg-[var(--accent)]/20 transition-colors">
+                <ArrowRight className="w-6 h-6 text-[var(--accent)]" />
+              </div>
+              <div className="text-left">
+                <h3 className="text-lg font-semibold text-[var(--text-primary)]">Continue Editing</h3>
+                <p className="text-sm text-[var(--text-secondary)]">Open the editor</p>
+              </div>
+            </div>
+          </button>
         </div>
 
-        {/* Clear Progress Indicator - High Contrast */}
-        <div className="w-full bg-background border-2 border-white rounded h-4 overflow-hidden">
-          <div 
-            className="h-full transition-all duration-3000 ease-linear" 
-            style={{ 
-              width: '33%',
-              backgroundColor: 'var(--primary)' // Yellow progress bar
-            }}
-          ></div>
-        </div>
+        {/* Recent Projects */}
+        {recentProjects.length > 0 && (
+          <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-[var(--border-primary)] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-[var(--text-secondary)]" />
+                <h2 className="text-lg font-semibold text-[var(--text-primary)]">Recent Projects</h2>
+              </div>
+              <span className="text-sm text-[var(--text-tertiary)]">{recentProjects.length} projects</span>
+            </div>
+            <div className="divide-y divide-[var(--border-primary)]">
+              {recentProjects.slice(0, 5).map((project) => (
+                <button
+                  key={project.id}
+                  onClick={() => handleOpenProject(project.id)}
+                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-[var(--surface-hover)] transition-colors group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-[var(--surface-elevated)] rounded-lg flex items-center justify-center">
+                      <FolderOpen className="w-5 h-5 text-[var(--text-secondary)]" />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="font-medium text-[var(--text-primary)] group-hover:text-[var(--primary)] transition-colors">
+                        {project.name}
+                      </h3>
+                      <p className="text-sm text-[var(--text-tertiary)]">
+                        Modified {formatDate(project.updatedAt)}
+                      </p>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-[var(--text-tertiary)] group-hover:text-[var(--primary)] transition-colors" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
-        <div className="mt-6 high-contrast-text text-lg font-semibold text-secondary">
-          Professional accessibility tools loading...
+        {/* Loading State */}
+        {isLoading && (
+          <div className="text-center py-12">
+            <div className="w-8 h-8 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-[var(--text-secondary)]">Loading...</p>
+          </div>
+        )}
+
+        {/* No Recent Projects */}
+        {!isLoading && recentProjects.length === 0 && (
+          <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-xl p-8 text-center">
+            <div className="w-16 h-16 bg-[var(--surface-hover)] rounded-full flex items-center justify-center mx-auto mb-4">
+              <FolderOpen className="w-8 h-8 text-[var(--text-tertiary)]" />
+            </div>
+            <h3 className="text-lg font-medium text-[var(--text-primary)] mb-2">No Recent Projects</h3>
+            <p className="text-[var(--text-secondary)] mb-4">
+              Create a new project to get started with video editing
+            </p>
+            <div className="w-full bg-[var(--surface-elevated)] border border-[var(--border-primary)] rounded-lg h-2 overflow-hidden">
+              <div
+                className="h-full rounded-lg bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] animate-pulse"
+                style={{ width: '60%' }}
+              />
+            </div>
+            <p className="text-sm text-[var(--text-tertiary)] mt-2">
+              Redirecting to editor in 3 seconds...
+            </p>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div className="text-center mt-8 text-sm text-[var(--text-tertiary)]">
+          <p>Video Editor Pro v1.0 · All data saved locally</p>
         </div>
       </div>
     </div>

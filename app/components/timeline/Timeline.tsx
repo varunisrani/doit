@@ -180,7 +180,10 @@ export function Timeline() {
   const timelineWidth = duration * zoom;
 
   return (
-    <div className="flex flex-col h-full bg-gray-900">
+    <div
+      className="flex flex-col h-full"
+      style={{ background: 'var(--timeline-bg)' }}
+    >
       {/* Controls */}
       <TimelineControls
         isPlaying={isPlaying}
@@ -201,16 +204,23 @@ export function Timeline() {
         {/* Time ruler */}
         <div className="relative flex">
           {/* Track header spacer */}
-          <div className="w-48 flex-shrink-0 bg-gray-800 border-r border-b border-gray-700" />
+          <div
+            className="w-48 flex-shrink-0 border-b"
+            style={{
+              background: 'var(--surface-elevated)',
+              borderColor: 'var(--border-primary)'
+            }}
+          />
 
           {/* Scrollable ruler */}
           <div
             ref={scrollContainerRef}
-            className="flex-1 overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800"
+            className="flex-1 overflow-x-auto overflow-y-hidden"
           >
             <TimeRuler
               duration={duration}
               zoom={zoom}
+              currentTime={currentTime}
               onSeek={handleSeek}
             />
           </div>
@@ -220,15 +230,27 @@ export function Timeline() {
         <div className="flex-1 flex overflow-hidden">
           {/* Tracks container */}
           <div
-            className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800"
+            className="flex-1 overflow-y-auto overflow-x-hidden"
             onClick={handleContainerClick}
           >
             <div className="flex">
               {/* Track list */}
               <div className="flex-shrink-0">
                 {tracks.length === 0 ? (
-                  <div className="p-8 text-center text-gray-500">
-                    <p>No tracks yet. Click "Add Track" to get started.</p>
+                  <div className="panel mx-4 my-8 text-center" style={{ color: 'var(--text-secondary)' }}>
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-16 h-16 rounded-full flex items-center justify-center"
+                           style={{ background: 'var(--surface-hover)' }}>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" style={{ stroke: 'var(--text-tertiary)' }}>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-medium" style={{ color: 'var(--text-primary)' }}>No tracks yet</p>
+                        <p className="text-sm mt-1">Click "Add Track" to get started.</p>
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   tracks.map((track) => (

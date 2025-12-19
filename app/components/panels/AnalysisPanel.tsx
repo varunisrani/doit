@@ -43,27 +43,37 @@ const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="border-b border-zinc-800">
+    <div className="border-b border-[var(--border-primary)]">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-4 py-3 hover:bg-zinc-800/50 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-3 hover:bg-[var(--surface-hover)] transition-all duration-200 group"
       >
         <div className="flex items-center gap-2">
-          {icon}
-          <span className="text-sm font-semibold text-white">{title}</span>
+          {icon && (
+            <span className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+              {icon}
+            </span>
+          )}
+          <span className="text-sm font-semibold text-[var(--text-primary)]">{title}</span>
           {badge && (
-            <span className="px-2 py-1 text-xs bg-blue-600/20 text-blue-400 rounded-full">
+            <span className="px-2 py-0.5 text-xs bg-[var(--accent)]/10 text-[var(--accent)] rounded-full font-medium">
               {badge}
             </span>
           )}
         </div>
-        {isOpen ? (
-          <ChevronDown className="w-4 h-4 text-zinc-400" />
-        ) : (
-          <ChevronRight className="w-4 h-4 text-zinc-400" />
-        )}
+        <ChevronDown
+          className={`w-4 h-4 text-[var(--text-secondary)] transition-transform duration-200 ${
+            isOpen ? 'rotate-180' : ''
+          }`}
+        />
       </button>
-      {isOpen && <div className="px-4 py-3">{children}</div>}
+      <div
+        className={`overflow-hidden transition-all duration-200 ${
+          isOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        <div className="px-4 py-3 bg-[var(--surface-elevated)]/50">{children}</div>
+      </div>
     </div>
   );
 };
@@ -82,10 +92,10 @@ const AnalysisItem: React.FC<AnalysisItemProps> = ({
   icon
 }) => {
   const typeStyles = {
-    info: 'border-blue-600/30 bg-blue-600/10 text-blue-400',
-    warning: 'border-yellow-600/30 bg-yellow-600/10 text-yellow-400',
-    error: 'border-red-600/30 bg-red-600/10 text-red-400',
-    success: 'border-green-600/30 bg-green-600/10 text-green-400'
+    info: 'border-[var(--info)]/30 bg-[var(--info-bg)] text-[var(--info)]',
+    warning: 'border-[var(--warning)]/30 bg-[var(--warning-bg)] text-[var(--warning)]',
+    error: 'border-[var(--error)]/30 bg-[var(--error-bg)] text-[var(--error)]',
+    success: 'border-[var(--success)]/30 bg-[var(--success-bg)] text-[var(--success)]'
   };
 
   const defaultIcons = {
@@ -96,12 +106,12 @@ const AnalysisItem: React.FC<AnalysisItemProps> = ({
   };
 
   return (
-    <div className={`p-3 rounded-lg border ${typeStyles[type]} mb-2`}>
-      <div className="flex items-start gap-2">
-        <span className="mt-0.5">{icon || defaultIcons[type]}</span>
-        <div className="flex-1">
-          <h4 className="font-medium text-white mb-1">{title}</h4>
-          <p className="text-sm text-zinc-300">{description}</p>
+    <div className={`p-4 rounded-xl border ${typeStyles[type]} mb-3 transition-all duration-200 hover:shadow-sm`}>
+      <div className="flex items-start gap-3">
+        <span className="mt-0.5 flex-shrink-0">{icon || defaultIcons[type]}</span>
+        <div className="flex-1 min-w-0">
+          <h4 className="font-medium text-[var(--text-primary)] mb-1">{title}</h4>
+          <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{description}</p>
         </div>
       </div>
     </div>
@@ -119,15 +129,19 @@ interface StatCardProps {
 }
 
 const StatCard: React.FC<StatCardProps> = ({ title, value, icon, trend }) => (
-  <div className="bg-zinc-800/50 rounded-lg p-3 border border-zinc-700">
-    <div className="flex items-center justify-between mb-1">
-      <span className="text-xs text-zinc-400">{title}</span>
-      {icon && <span className="text-zinc-400">{icon}</span>}
+  <div className="bg-[var(--surface-elevated)]/50 rounded-xl p-4 border border-[var(--border-primary)] hover:bg-[var(--surface-hover)] hover:border-[var(--border-secondary)] transition-all duration-200 hover:shadow-sm">
+    <div className="flex items-center justify-between mb-2">
+      <span className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide">{title}</span>
+      {icon && <span className="text-[var(--text-secondary)]">{icon}</span>}
     </div>
-    <div className="flex items-center gap-2">
-      <span className="text-lg font-bold text-white">{value}</span>
+    <div className="flex items-baseline gap-2">
+      <span className="text-xl font-bold text-[var(--text-primary)]">{value}</span>
       {trend && (
-        <span className={`text-xs ${trend.isPositive ? 'text-green-400' : 'text-red-400'}`}>
+        <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${
+          trend.isPositive
+            ? 'bg-[var(--success-bg)] text-[var(--success)]'
+            : 'bg-[var(--error-bg)] text-[var(--error)]'
+        }`}>
           {trend.isPositive ? '+' : ''}{trend.value}%
         </span>
       )}
@@ -138,7 +152,12 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, trend }) => (
 export const AnalysisPanel: React.FC = () => {
   const { elements } = useCanvasStore();
   const { selectedElementIds } = useSelectionStore();
-  const { clips, duration } = useTimelineStore();
+  const { tracks, duration } = useTimelineStore();
+
+  // Get all clips from all tracks
+  const clips = useMemo(() => {
+    return tracks.flatMap(track => track.clips || []);
+  }, [tracks]);
 
   // Calculate project statistics
   const projectStats = useMemo(() => {
@@ -147,7 +166,7 @@ export const AnalysisPanel: React.FC = () => {
       return acc;
     }, {} as Record<string, number>);
 
-    const totalTransitions = clips.reduce((count, clip) => {
+    const totalTransitions = clips.reduce((count, clip: any) => {
       return count + ((clip.transitionIn ? 1 : 0) + (clip.transitionOut ? 1 : 0));
     }, 0);
 
@@ -157,10 +176,10 @@ export const AnalysisPanel: React.FC = () => {
       totalElements: elements.length,
       totalClips: clips.length,
       totalTransitions,
-      duration: Math.round(duration / 1000), // Convert to seconds
+      duration: Math.round(duration), // Already in seconds
       elementsByType,
       avgElementDuration,
-      selectedCount: selectedElementIds.length
+      selectedCount: selectedElementIds.size
     };
   }, [elements, clips, duration, selectedElementIds]);
 
@@ -168,7 +187,7 @@ export const AnalysisPanel: React.FC = () => {
   const transitionIssues = useMemo(() => {
     const issues: TransitionIssue[] = [];
 
-    clips.forEach((clip, index) => {
+    clips.forEach((clip: any, index: number) => {
       if (clip.transitionIn) {
         const clipIssues = analyzeTransition(clip.transitionIn, clip.duration || 0);
         issues.push(...clipIssues.map(issue => ({
@@ -287,13 +306,16 @@ export const AnalysisPanel: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-full bg-zinc-900 border-l border-zinc-800 overflow-y-auto">
-      <div className="p-4 border-b border-zinc-800">
-        <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-          <BarChart3 className="w-5 h-5" />
-          Analysis Panel
-        </h2>
-        <p className="text-xs text-zinc-400 mt-1">
+    <div className="w-full h-full bg-[var(--surface)] border-l border-[var(--border-primary)] overflow-y-auto shadow-lg">
+      <div className="p-4 border-b border-[var(--border-primary)] bg-[var(--surface-elevated)]">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-2 h-2 rounded-full bg-[var(--accent)]"></div>
+          <h2 className="text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-[var(--accent)]" />
+            Analysis Panel
+          </h2>
+        </div>
+        <p className="text-xs text-[var(--text-secondary)]">
           Real-time analysis of your video project
         </p>
       </div>
@@ -327,17 +349,27 @@ export const AnalysisPanel: React.FC = () => {
           />
         </div>
 
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white mb-2">Element Breakdown</h4>
-          {Object.entries(projectStats.elementsByType).map(([type, count]) => (
-            <div key={type} className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2 text-zinc-300">
-                {elementIcons[type as keyof typeof elementIcons]}
-                <span className="capitalize">{type}s</span>
+        <div className="space-y-3">
+          <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-3">Element Breakdown</h4>
+          <div className="grid gap-2">
+            {Object.entries(projectStats.elementsByType).map(([type, count]) => (
+              <div key={type} className="flex items-center justify-between p-3 bg-[var(--surface)] rounded-lg border border-[var(--border-primary)] hover:bg-[var(--surface-hover)] transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-[var(--surface-hover)] flex items-center justify-center">
+                    {elementIcons[type as keyof typeof elementIcons]}
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-[var(--text-primary)] capitalize">{type}s</span>
+                    <p className="text-xs text-[var(--text-tertiary)]">Project elements</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="text-lg font-bold text-[var(--text-primary)]">{count}</span>
+                  <p className="text-xs text-[var(--text-tertiary)]">items</p>
+                </div>
               </div>
-              <span className="text-white font-medium">{count}</span>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </CollapsibleSection>
 

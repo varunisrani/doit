@@ -169,19 +169,21 @@ export default function KeyframeSystemExample() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--text-primary)] p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between p-6 bg-[var(--surface-elevated)] backdrop-blur-xl rounded-2xl border border-[var(--border-primary)]">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Keyframe Animation System</h1>
-            <p className="text-gray-400">
+            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+              Keyframe Animation System
+            </h1>
+            <p className="text-[var(--text-secondary)] text-sm">
               Complete example of keyframe-based animation system
             </p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-sm text-gray-400">
-              Zoom:
+          <div className="flex items-center gap-6">
+            <div className="text-sm text-[var(--text-secondary)] flex items-center gap-3">
+              <span>Zoom:</span>
               <input
                 type="range"
                 min="0.5"
@@ -189,17 +191,21 @@ export default function KeyframeSystemExample() {
                 step="0.1"
                 value={zoom}
                 onChange={(e) => setZoom(Number(e.target.value))}
-                className="ml-2 w-32"
+                className="w-32 accent-purple-500"
               />
-              <span className="ml-2">{zoom.toFixed(1)}x</span>
+              <span className="text-purple-400 font-mono font-semibold">
+                {zoom.toFixed(1)}x
+              </span>
             </div>
           </div>
         </div>
 
         {/* Preview Canvas */}
-        <div className="bg-gray-900 rounded-lg p-4 border border-gray-800">
-          <h2 className="text-lg font-semibold mb-4">Preview</h2>
-          <div className="relative bg-black rounded aspect-video overflow-hidden">
+        <div className="bg-[var(--surface)] backdrop-blur-xl rounded-2xl p-6 border border-[var(--border-primary)]">
+          <h2 className="text-xl font-semibold mb-6 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            Preview
+          </h2>
+          <div className="relative bg-[var(--surface-elevated)] backdrop-blur-sm rounded-2xl aspect-video overflow-hidden border border-[var(--border-primary)]">
             {/* Render animated elements */}
             {elements.map((element) => {
               const animatedValues = getElementAnimatedValues(
@@ -218,8 +224,8 @@ export default function KeyframeSystemExample() {
                 <div
                   key={element.id}
                   className={`
-                    absolute cursor-pointer transition-shadow
-                    ${selectedElement === element.id ? 'ring-2 ring-purple-500' : ''}
+                    absolute cursor-pointer transition-all duration-300
+                    ${selectedElement === element.id ? 'ring-2 ring-purple-400 ring-offset-2 ring-offset-black' : ''}
                   `}
                   style={{
                     width: animatedValues.width,
@@ -231,32 +237,32 @@ export default function KeyframeSystemExample() {
                   onClick={() => setSelectedElement(element.id)}
                 >
                   {element.type === 'text' && (
-                    <div className="flex items-center justify-center h-full bg-purple-600 rounded-lg p-4">
-                      <span className="text-white font-bold text-2xl">
+                    <div className="flex items-center justify-center h-full bg-gradient-to-br from-purple-600/90 to-purple-700/90 backdrop-blur-sm rounded-xl p-4 border border-purple-500/30">
+                      <span className="text-white font-bold text-2xl drop-shadow-sm">
                         {element.content}
                       </span>
                     </div>
                   )}
                   {element.type === 'shape' && (
-                    <div className="w-full h-full bg-blue-600 rounded-lg" />
+                    <div className="w-full h-full bg-gradient-to-br from-blue-600/90 to-blue-700/90 backdrop-blur-sm rounded-xl border border-blue-500/30" />
                   )}
                 </div>
               );
             })}
 
             {/* Time indicator overlay */}
-            <div className="absolute bottom-4 left-4 bg-black/50 px-3 py-1 rounded text-sm font-mono">
+            <div className="absolute bottom-6 left-6 bg-[var(--surface-elevated)] backdrop-blur-xl px-4 py-2 rounded-xl text-sm font-mono border border-[var(--border-primary)] shadow-xl">
               {formatTime(currentTime)} / {formatTime(duration)}
             </div>
           </div>
         </div>
 
         {/* Playback Controls */}
-        <div className="bg-gray-900 rounded-lg p-4 border border-gray-800">
-          <div className="flex items-center gap-4">
+        <div className="bg-[var(--surface)] backdrop-blur-xl rounded-2xl p-6 border border-[var(--border-primary)]">
+          <div className="flex items-center gap-6">
             <button
               onClick={togglePlayback}
-              className="px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded font-medium transition-colors"
+              className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-purple-500/25 transform hover:scale-105"
             >
               {isPlaying ? 'Pause' : 'Play'}
             </button>
@@ -265,7 +271,7 @@ export default function KeyframeSystemExample() {
                 setCurrentTime(0);
                 setIsPlaying(false);
               }}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded transition-colors"
+              className="px-6 py-3 bg-[var(--surface-hover)] hover:bg-[var(--surface)] rounded-xl font-medium transition-all duration-300 border border-[var(--border-primary)] hover:border-[var(--border-secondary)]"
             >
               Reset
             </button>
@@ -273,40 +279,42 @@ export default function KeyframeSystemExample() {
             {/* Timeline Scrubber */}
             <div className="flex-1">
               <div
-                className="relative h-8 bg-gray-800 rounded cursor-pointer"
+                className="relative h-12 bg-[var(--surface)] rounded-xl cursor-pointer overflow-hidden backdrop-blur-sm border border-[var(--border-primary)]"
                 onClick={handleTimelineClick}
               >
                 <div
-                  className="absolute top-0 left-0 h-full bg-purple-600 rounded transition-all"
+                  className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-500/80 to-pink-500/80 rounded-xl transition-all duration-150 backdrop-blur-sm"
                   style={{ width: `${(currentTime / duration) * 100}%` }}
                 />
                 <div
-                  className="absolute top-0 w-1 h-full bg-white"
+                  className="absolute top-0 w-2 h-full bg-gradient-to-b from-purple-400 to-pink-400 shadow-lg shadow-purple-500/50"
                   style={{ left: `${(currentTime / duration) * 100}%` }}
                 />
               </div>
             </div>
 
-            <div className="text-sm font-mono text-gray-400 w-32 text-right">
+            <div className="text-sm font-mono text-[var(--text-secondary)] w-40 text-right bg-[var(--surface)] px-4 py-2 rounded-xl border border-[var(--border-primary)] backdrop-blur-sm">
               {formatTime(currentTime)}
             </div>
           </div>
         </div>
 
         {/* Element Selector */}
-        <div className="bg-gray-900 rounded-lg p-4 border border-gray-800">
-          <h3 className="text-sm font-semibold mb-3">Elements</h3>
-          <div className="flex gap-2">
+        <div className="bg-[var(--surface)] backdrop-blur-xl rounded-2xl p-6 border border-[var(--border-primary)]">
+          <h3 className="text-lg font-semibold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            Elements
+          </h3>
+          <div className="flex gap-3 flex-wrap">
             {elements.map((element) => (
               <button
                 key={element.id}
                 onClick={() => setSelectedElement(element.id)}
                 className={`
-                  px-4 py-2 rounded transition-colors
+                  px-6 py-3 rounded-xl transition-all duration-300 backdrop-blur-sm border font-medium
                   ${
                     selectedElement === element.id
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                      ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-600 border-purple-500/30 shadow-lg shadow-purple-500/10'
+                      : 'bg-[var(--surface-hover)] text-[var(--text-secondary)] hover:bg-[var(--surface)] border-[var(--border-primary)] hover:border-[var(--border-secondary)]'
                   }
                 `}
               >
@@ -318,9 +326,9 @@ export default function KeyframeSystemExample() {
 
         {/* Keyframe Timeline and Editor */}
         {currentElement && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
             {/* Timeline (takes 2 columns on large screens) */}
-            <div className="lg:col-span-2">
+            <div className="xl:col-span-2">
               <KeyframeTimeline
                 elementId={currentElement.id}
                 keyframes={currentElement.keyframes}
@@ -350,56 +358,82 @@ export default function KeyframeSystemExample() {
         )}
 
         {/* Instructions */}
-        <div className="bg-gray-900 rounded-lg p-6 border border-gray-800">
-          <h3 className="text-lg font-semibold mb-4">How to Use</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-300">
-            <div>
-              <h4 className="font-semibold text-white mb-2">Timeline Interactions:</h4>
-              <ul className="space-y-1">
-                <li>• Click on track to add keyframe</li>
-                <li>• Drag diamond to move keyframe</li>
-                <li>• Right-click diamond to delete</li>
-                <li>• Click diamond to select and edit</li>
+        <div className="bg-[var(--surface)] backdrop-blur-xl rounded-2xl p-8 border border-[var(--border-primary)]">
+          <h3 className="text-xl font-semibold mb-6 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            How to Use
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm text-[var(--text-secondary)]">
+            <div className="space-y-4">
+              <h4 className="font-semibold text-[var(--text-primary)] text-base mb-4">Timeline Interactions:</h4>
+              <ul className="space-y-3">
+                <li className="flex items-start gap-2">
+                  <span className="text-purple-400 mt-1">•</span>
+                  <span>Click on track to add keyframe</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-purple-400 mt-1">•</span>
+                  <span>Drag diamond to move keyframe</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-purple-400 mt-1">•</span>
+                  <span>Right-click diamond to delete</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-purple-400 mt-1">•</span>
+                  <span>Click diamond to select and edit</span>
+                </li>
               </ul>
             </div>
-            <div>
-              <h4 className="font-semibold text-white mb-2">Editor Panel:</h4>
-              <ul className="space-y-1">
-                <li>• Toggle keyframes per property</li>
-                <li>• Adjust values and timing</li>
-                <li>• Select easing functions</li>
-                <li>• Preview easing curves</li>
+            <div className="space-y-4">
+              <h4 className="font-semibold text-[var(--text-primary)] text-base mb-4">Editor Panel:</h4>
+              <ul className="space-y-3">
+                <li className="flex items-start gap-2">
+                  <span className="text-purple-400 mt-1">•</span>
+                  <span>Toggle keyframes per property</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-purple-400 mt-1">•</span>
+                  <span>Adjust values and timing</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-purple-400 mt-1">•</span>
+                  <span>Select easing functions</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-purple-400 mt-1">•</span>
+                  <span>Preview easing curves</span>
+                </li>
               </ul>
             </div>
           </div>
         </div>
 
         {/* Stats */}
-        <div className="bg-gray-900 rounded-lg p-4 border border-gray-800">
-          <div className="grid grid-cols-4 gap-4 text-center">
-            <div>
-              <div className="text-2xl font-bold text-purple-400">
+        <div className="bg-[var(--surface)] backdrop-blur-xl rounded-2xl p-6 border border-[var(--border-primary)]">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div className="p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl border border-purple-500/20">
+              <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                 {elements.length}
               </div>
-              <div className="text-xs text-gray-500">Elements</div>
+              <div className="text-xs text-[var(--text-tertiary)] mt-1">Elements</div>
             </div>
-            <div>
-              <div className="text-2xl font-bold text-purple-400">
+            <div className="p-4 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl border border-blue-500/20">
+              <div className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                 {currentElement?.keyframes.length || 0}
               </div>
-              <div className="text-xs text-gray-500">Keyframes</div>
+              <div className="text-xs text-[var(--text-tertiary)] mt-1">Keyframes</div>
             </div>
-            <div>
-              <div className="text-2xl font-bold text-purple-400">
+            <div className="p-4 bg-gradient-to-br from-green-500/10 to-blue-500/10 rounded-xl border border-green-500/20">
+              <div className="text-3xl font-bold bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
                 {formatTime(duration)}
               </div>
-              <div className="text-xs text-gray-500">Duration</div>
+              <div className="text-xs text-[var(--text-tertiary)] mt-1">Duration</div>
             </div>
-            <div>
-              <div className="text-2xl font-bold text-purple-400">
+            <div className="p-4 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-xl border border-orange-500/20">
+              <div className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">
                 {zoom.toFixed(1)}x
               </div>
-              <div className="text-xs text-gray-500">Zoom</div>
+              <div className="text-xs text-[var(--text-tertiary)] mt-1">Zoom</div>
             </div>
           </div>
         </div>

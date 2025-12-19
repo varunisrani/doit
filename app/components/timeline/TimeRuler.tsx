@@ -6,10 +6,11 @@ import { formatTime } from '../../lib/timeline/timeUtils';
 interface TimeRulerProps {
   duration: number; // in seconds
   zoom: number; // pixels per second
+  currentTime?: number; // in seconds - for preview line
   onSeek: (time: number) => void;
 }
 
-export function TimeRuler({ duration, zoom, onSeek }: TimeRulerProps) {
+export function TimeRuler({ duration, zoom, currentTime = 0, onSeek }: TimeRulerProps) {
   // Calculate tick intervals based on zoom
   const { majorInterval, minorInterval } = useMemo(() => {
     // Adjust intervals based on zoom level
@@ -56,16 +57,49 @@ export function TimeRuler({ duration, zoom, onSeek }: TimeRulerProps) {
 
   return (
     <div
-      className="relative h-8 bg-gray-800 border-b border-gray-700 cursor-pointer select-none overflow-hidden"
+      className="relative h-10 cursor-pointer select-none overflow-hidden transition-colors duration-200 hover:bg-[var(--surface-hover)]"
+      style={{
+        width: `${width}px`,
+        background: 'var(--surface)',
+        borderBottom: `1px solid var(--border-primary)`,
+      }}
       onClick={handleClick}
-      style={{ width: `${width}px` }}
     >
+      {/* Background grid pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <svg className="w-full h-full" preserveAspectRatio="none">
+          <defs>
+            <pattern
+              id="ruler-grid"
+              patternUnits="userSpaceOnUse"
+              width={minorInterval * zoom}
+              height="100%"
+            >
+              <line
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="100%"
+                stroke="var(--border-secondary)"
+                strokeWidth="1"
+              />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#ruler-grid)" />
+        </svg>
+      </div>
+
       {/* Minor ticks */}
       {ticks.minorTicks.map((time) => (
         <div
           key={`minor-${time}`}
-          className="absolute bottom-0 w-px h-2 bg-gray-600"
-          style={{ left: `${time * zoom}px` }}
+          className="absolute bottom-0 opacity-40 transition-opacity duration-200 hover:opacity-60"
+          style={{
+            left: `${time * zoom}px`,
+            width: '1px',
+            height: '8px',
+            background: 'var(--border-secondary)',
+          }}
         />
       ))}
 
@@ -73,18 +107,50 @@ export function TimeRuler({ duration, zoom, onSeek }: TimeRulerProps) {
       {ticks.majorTicks.map(({ time, label }) => (
         <div
           key={`major-${time}`}
-          className="absolute bottom-0"
+          className="absolute bottom-0 transition-all duration-200 hover:scale-105"
           style={{ left: `${time * zoom}px` }}
         >
-          {/* Tick mark */}
-          <div className="w-px h-4 bg-gray-400" />
+          {/* Tick mark with enhanced styling */}
+          <div
+            className="w-px transition-all duration-200 hover:opacity-80"
+            style={{
+              height: '16px',
+              background: 'var(--ruler-text)',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.3)',
+            }}
+          />
 
-          {/* Time label */}
-          <div className="absolute top-0 left-1 text-xs text-gray-300 whitespace-nowrap">
+          {/* Time label with modern typography */}
+          <div
+            className="absolute top-0 left-1.5 text-xs font-mono font-medium whitespace-nowrap transition-all duration-200"
+            style={{
+              color: 'var(--ruler-text)',
+              textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+              lineHeight: '40px', // Center vertically in the 40px height
+            }}
+          >
             {label}
           </div>
+
+          {/* Hover indicator */}
+          <div
+            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-1 rounded-full opacity-0 transition-opacity duration-200"
+            style={{
+              background: 'var(--primary)',
+            }}
+          />
         </div>
       ))}
+
+      {/* Seek preview line on hover */}
+      <div
+        className="absolute top-0 bottom-0 w-0.5 pointer-events-none opacity-0 transition-opacity duration-200"
+        style={{
+          left: `${currentTime * zoom}px`,
+          background: 'var(--primary)',
+          boxShadow: `0 0 8px var(--primary)60`,
+        }}
+      />
     </div>
   );
 }

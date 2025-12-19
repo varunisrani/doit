@@ -57,109 +57,149 @@ export const StyleSection: React.FC<StyleSectionProps> = ({
   };
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-white">Style</h3>
+    <div className="space-y-6">
+      {/* Section Header */}
+      <div className="flex items-center gap-2">
+        <div className="w-1 h-5 rounded-full bg-[var(--accent)]"></div>
+        <h3 className="text-sm font-semibold text-[var(--text-primary)]">Style Properties</h3>
+      </div>
 
       {/* Opacity */}
-      <Slider
-        label="Opacity"
-        value={style.opacity * 100}
-        onChange={(value) => onUpdate({ opacity: value / 100 })}
-        min={0}
-        max={100}
-        step={1}
-        disabled={disabled}
-      />
-
-      {/* Blend Mode */}
-      <Dropdown
-        label="Blend Mode"
-        value={style.blendMode}
-        onChange={(value) => onUpdate({ blendMode: value as BlendMode })}
-        options={BLEND_MODES.map((mode) => ({
-          value: mode,
-          label: mode.charAt(0).toUpperCase() + mode.slice(1).replace('-', ' '),
-        }))}
-        disabled={disabled}
-      />
-
-      {/* Border */}
       <div className="space-y-2">
-        <h4 className="text-xs font-medium text-zinc-400">Border</h4>
-
-        <div className="grid grid-cols-2 gap-2">
-          <Input
-            label="Width"
-            type="number"
-            value={style.borderWidth || 0}
-            onChange={(e) => onUpdate({ borderWidth: parseFloat(e.target.value) || 0 })}
-            disabled={disabled}
-            className="text-xs"
+        <label className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide">
+          Opacity
+        </label>
+        <div className="p-3 bg-[var(--surface-elevated)]/50 rounded-lg border border-[var(--border-primary)]">
+          <Slider
+            value={style.opacity * 100}
+            onChange={(value) => onUpdate({ opacity: value / 100 })}
             min={0}
-          />
-          <Input
-            label="Radius"
-            type="number"
-            value={style.borderRadius || 0}
-            onChange={(e) => onUpdate({ borderRadius: parseFloat(e.target.value) || 0 })}
+            max={100}
+            step={1}
             disabled={disabled}
-            className="text-xs"
-            min={0}
+            showValue={true}
+            valueSuffix="%"
           />
         </div>
+      </div>
 
-        <Dropdown
-          label="Style"
-          value={style.borderStyle || 'solid'}
-          onChange={(value) => onUpdate({ borderStyle: value as typeof BORDER_STYLES[number] })}
-          options={BORDER_STYLES.map((s) => ({
-            value: s,
-            label: s.charAt(0).toUpperCase() + s.slice(1),
-          }))}
-          disabled={disabled}
-        />
+      {/* Blend Mode */}
+      <div className="space-y-2">
+        <label className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide">
+          Blend Mode
+        </label>
+        <div className="p-3 bg-[var(--surface-elevated)]/50 rounded-lg border border-[var(--border-primary)]">
+          <Dropdown
+            value={style.blendMode}
+            onChange={(value) => onUpdate({ blendMode: value as BlendMode })}
+            options={BLEND_MODES.map((mode) => ({
+              value: mode,
+              label: mode.charAt(0).toUpperCase() + mode.slice(1).replace('-', ' '),
+            }))}
+            disabled={disabled}
+          />
+        </div>
+      </div>
 
-        <ColorPicker
-          label="Color"
-          value={style.borderColor || '#000000'}
-          onChange={(value) => onUpdate({ borderColor: value })}
-          disabled={disabled}
-        />
+      {/* Border */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <label className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide">
+            Border
+          </label>
+          <div className="flex-1 h-px bg-[var(--border-primary)]"></div>
+        </div>
+
+        <div className="p-3 bg-[var(--surface-elevated)]/50 rounded-lg border border-[var(--border-primary)] space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="Width"
+              type="number"
+              value={style.borderWidth || 0}
+              onChange={(e) => onUpdate({ borderWidth: parseFloat(e.target.value) || 0 })}
+              disabled={disabled}
+              className="text-sm"
+              min={0}
+              rightIcon={<span className="text-xs text-[var(--text-tertiary)]">px</span>}
+            />
+            <Input
+              label="Radius"
+              type="number"
+              value={style.borderRadius || 0}
+              onChange={(e) => onUpdate({ borderRadius: parseFloat(e.target.value) || 0 })}
+              disabled={disabled}
+              className="text-sm"
+              min={0}
+              rightIcon={<span className="text-xs text-[var(--text-tertiary)]">px</span>}
+            />
+          </div>
+
+          <Dropdown
+            label="Style"
+            value={style.borderStyle || 'solid'}
+            onChange={(value) => onUpdate({ borderStyle: value as typeof BORDER_STYLES[number] })}
+            options={BORDER_STYLES.map((s) => ({
+              value: s,
+              label: s.charAt(0).toUpperCase() + s.slice(1),
+            }))}
+            disabled={disabled}
+          />
+
+          <ColorPicker
+            label="Color"
+            value={style.borderColor || '#000000'}
+            onChange={(value) => onUpdate({ borderColor: value })}
+            disabled={disabled}
+          />
+        </div>
       </div>
 
       {/* Shadow */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h4 className="text-xs font-medium text-zinc-400">Shadow</h4>
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide">
+              Shadow
+            </label>
+            <div className="flex-1 h-px bg-[var(--border-primary)]"></div>
+          </div>
           {style.shadow && (
-            <button
+            <Button
               onClick={removeShadow}
               disabled={disabled}
-              className="text-xs text-red-500 hover:text-red-400 disabled:opacity-50"
+              variant="ghost"
+              size="sm"
+              className="text-xs text-[var(--error)] hover:text-[var(--error)] hover:bg-[var(--error-bg)]"
             >
               Remove
-            </button>
+            </Button>
           )}
         </div>
 
-        {!style.shadow && (
-          <button
-            onClick={() => updateShadow({
-              color: '#000000',
-              blur: 10,
-              offsetX: 0,
-              offsetY: 4,
-              spread: 0,
-            })}
-            disabled={disabled}
-            className="w-full px-3 py-2 text-xs font-medium bg-zinc-800 text-zinc-400 rounded-md hover:bg-zinc-700 disabled:opacity-50"
-          >
-            Add Shadow
-          </button>
-        )}
-
-        {style.shadow && (
-          <>
+        {!style.shadow ? (
+          <div className="p-6 bg-[var(--surface-elevated)]/50 rounded-lg border border-[var(--border-primary)] border-dashed">
+            <button
+              onClick={() => updateShadow({
+                color: '#000000',
+                blur: 10,
+                offsetX: 0,
+                offsetY: 4,
+                spread: 0,
+              })}
+              disabled={disabled}
+              className="w-full flex flex-col items-center justify-center gap-2 py-4 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors group"
+            >
+              <div className="w-12 h-12 rounded-lg bg-[var(--surface-hover)] flex items-center justify-center group-hover:bg-[var(--primary)]/10 transition-colors">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium">Add Shadow</span>
+              <span className="text-xs text-[var(--text-tertiary)]">Click to add a shadow effect</span>
+            </button>
+          </div>
+        ) : (
+          <div className="p-3 bg-[var(--surface-elevated)]/50 rounded-lg border border-[var(--border-primary)] space-y-4">
             <ColorPicker
               label="Color"
               value={style.shadow.color}
@@ -167,14 +207,15 @@ export const StyleSection: React.FC<StyleSectionProps> = ({
               disabled={disabled}
             />
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-3">
               <Input
                 label="Offset X"
                 type="number"
                 value={style.shadow.offsetX}
                 onChange={(e) => updateShadow({ offsetX: parseFloat(e.target.value) || 0 })}
                 disabled={disabled}
-                className="text-xs"
+                className="text-sm"
+                rightIcon={<span className="text-xs text-[var(--text-tertiary)]">px</span>}
               />
               <Input
                 label="Offset Y"
@@ -182,19 +223,21 @@ export const StyleSection: React.FC<StyleSectionProps> = ({
                 value={style.shadow.offsetY}
                 onChange={(e) => updateShadow({ offsetY: parseFloat(e.target.value) || 0 })}
                 disabled={disabled}
-                className="text-xs"
+                className="text-sm"
+                rightIcon={<span className="text-xs text-[var(--text-tertiary)]">px</span>}
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-3">
               <Input
                 label="Blur"
                 type="number"
                 value={style.shadow.blur}
                 onChange={(e) => updateShadow({ blur: parseFloat(e.target.value) || 0 })}
                 disabled={disabled}
-                className="text-xs"
+                className="text-sm"
                 min={0}
+                rightIcon={<span className="text-xs text-[var(--text-tertiary)]">px</span>}
               />
               <Input
                 label="Spread"
@@ -202,10 +245,11 @@ export const StyleSection: React.FC<StyleSectionProps> = ({
                 value={style.shadow.spread || 0}
                 onChange={(e) => updateShadow({ spread: parseFloat(e.target.value) || 0 })}
                 disabled={disabled}
-                className="text-xs"
+                className="text-sm"
+                rightIcon={<span className="text-xs text-[var(--text-tertiary)]">px</span>}
               />
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>

@@ -1,5 +1,9 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
+import { enableMapSet } from 'immer';
+
+// Enable Immer plugin for Map and Set
+enableMapSet();
 
 // Types
 export interface SelectionBox {

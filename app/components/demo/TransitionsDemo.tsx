@@ -107,7 +107,7 @@ export default function TransitionsDemo() {
     if (!ctx) return;
 
     // Clear canvas
-    ctx.fillStyle = '#1a1a1a';
+    ctx.fillStyle = '#111111';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Render each clip
@@ -245,7 +245,7 @@ export default function TransitionsDemo() {
   const pixelsPerMs = 0.1;
 
   return (
-    <div className="h-screen bg-gray-950 text-white flex">
+    <div className="h-screen bg-[var(--background)] text-[var(--text-primary)] flex">
       {/* Transitions Panel */}
       <div className="w-80 flex-shrink-0">
         <TransitionsPanel
@@ -257,28 +257,30 @@ export default function TransitionsDemo() {
       {/* Main Area */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="p-4 border-b border-gray-700 bg-gray-900">
-          <h1 className="text-2xl font-bold mb-2">Transitions Demo</h1>
-          <p className="text-gray-400">
+        <div className="p-6 border-b border-[var(--border-primary)] bg-[var(--surface-elevated)] backdrop-blur-xl">
+          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-[var(--primary)] via-[var(--accent)] to-[var(--primary-light)] bg-clip-text text-transparent">
+            Transitions Demo
+          </h1>
+          <p className="text-[var(--text-secondary)] text-sm">
             Click a clip to select it, then choose a transition from the left panel
           </p>
         </div>
 
         {/* Canvas Preview */}
-        <div className="flex-1 flex items-center justify-center p-8 bg-gray-900">
+        <div className="flex-1 flex items-center justify-center p-8 bg-[var(--surface)]">
           <div className="relative">
             <canvas
               ref={canvasRef}
               width={800}
               height={600}
-              className="border-2 border-gray-700 rounded-lg shadow-2xl"
+              className="border border-[var(--border-primary)] rounded-xl shadow-[var(--shadow-xl)] bg-[var(--surface-elevated)] backdrop-blur-sm"
             />
 
             {/* Playback Controls */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-gray-800/90 backdrop-blur rounded-lg px-4 py-2 flex items-center gap-4">
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-[var(--backdrop-overlay)] backdrop-blur-xl rounded-xl px-6 py-3 flex items-center gap-4 border border-[var(--border-primary)] shadow-[var(--shadow-lg)]">
               <button
                 onClick={() => setIsPlaying(!isPlaying)}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded font-medium transition-colors"
+                className="px-6 py-2 bg-[var(--primary)] hover:bg-[var(--primary-light)] rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 text-[var(--text-inverse)]"
               >
                 {isPlaying ? 'Pause' : 'Play'}
               </button>
@@ -288,7 +290,7 @@ export default function TransitionsDemo() {
                   setCurrentTime(0);
                   lastTimeRef.current = 0;
                 }}
-                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded font-medium transition-colors"
+                className="px-6 py-2 bg-[var(--surface)] hover:bg-[var(--surface-hover)] rounded-lg font-medium transition-all duration-200 border border-[var(--border-primary)] text-[var(--text-primary)]"
               >
                 Reset
               </button>
@@ -299,10 +301,10 @@ export default function TransitionsDemo() {
                 max="8000"
                 value={currentTime}
                 onChange={(e) => setCurrentTime(parseInt(e.target.value))}
-                className="w-64"
+                className="w-64 accent-[var(--primary)]"
               />
 
-              <span className="text-sm tabular-nums">
+              <span className="text-sm tabular-nums font-mono text-[var(--text-secondary)]">
                 {(currentTime / 1000).toFixed(2)}s / 8.00s
               </span>
             </div>
@@ -310,19 +312,21 @@ export default function TransitionsDemo() {
         </div>
 
         {/* Timeline */}
-        <div className="h-64 border-t border-gray-700 bg-gray-850 p-4 overflow-x-auto">
-          <div className="mb-4">
-            <h3 className="font-semibold mb-2">Timeline</h3>
+        <div className="h-72 border-t border-[var(--border-primary)] bg-[var(--timeline-bg)] backdrop-blur-xl p-6 overflow-x-auto">
+          <div className="mb-6">
+            <h3 className="font-semibold mb-4 text-lg bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] bg-clip-text text-transparent">
+              Timeline
+            </h3>
 
             {/* Presets */}
-            <div className="mb-3 flex gap-2">
-              <span className="text-sm text-gray-400">Quick Presets:</span>
+            <div className="mb-4 flex gap-2 flex-wrap">
+              <span className="text-sm text-[var(--text-secondary)] self-center">Quick Presets:</span>
               {transitionPresets.slice(0, 4).map(preset => (
                 <button
                   key={preset.id}
                   onClick={() => handlePresetApply(preset.id)}
                   disabled={!selectedClipId}
-                  className="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
+                  className="px-4 py-2 text-sm bg-[var(--surface)] hover:bg-[var(--surface-hover)] disabled:opacity-30 disabled:cursor-not-allowed rounded-lg transition-all duration-200 border border-[var(--border-primary)] text-[var(--text-primary)]"
                   title={preset.description}
                 >
                   {preset.name}
@@ -332,16 +336,16 @@ export default function TransitionsDemo() {
           </div>
 
           {/* Time ruler */}
-          <div className="relative h-40 bg-gray-800 rounded">
+          <div className="relative h-48 bg-[var(--surface-elevated)] rounded-xl border border-[var(--border-primary)] backdrop-blur-sm overflow-hidden">
             {/* Time markers */}
-            <div className="absolute top-0 left-0 right-0 h-6 border-b border-gray-700">
+            <div className="absolute top-0 left-0 right-0 h-8 border-b border-[var(--border-primary)] bg-gradient-to-b from-[var(--surface-hover)] to-transparent">
               {[0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000].map(time => (
                 <div
                   key={time}
-                  className="absolute top-0 h-full border-l border-gray-600"
+                  className="absolute top-0 h-full border-l border-[var(--border-secondary)]"
                   style={{ left: `${time * pixelsPerMs}px` }}
                 >
-                  <span className="absolute top-1 left-1 text-xs text-gray-400">
+                  <span className="absolute top-2 left-2 text-xs text-[var(--text-secondary)] font-mono">
                     {time / 1000}s
                   </span>
                 </div>
@@ -349,7 +353,7 @@ export default function TransitionsDemo() {
             </div>
 
             {/* Clips */}
-            <div className="absolute top-8 left-0 right-0 bottom-0 p-2">
+            <div className="absolute top-10 left-0 right-0 bottom-0 p-4">
               {clips.map((clip, index) => {
                 const width = (clip.endTime - clip.startTime) * pixelsPerMs;
                 const left = clip.startTime * pixelsPerMs;
@@ -358,20 +362,20 @@ export default function TransitionsDemo() {
                   <div
                     key={clip.id}
                     onClick={() => setSelectedClipId(clip.id)}
-                    className={`absolute h-16 rounded cursor-pointer transition-all ${
+                    className={`absolute h-20 rounded-lg cursor-pointer transition-all duration-200 backdrop-blur-sm border ${
                       selectedClipId === clip.id
-                        ? 'ring-2 ring-blue-400 scale-105'
-                        : 'hover:scale-102'
+                        ? 'ring-2 ring-[var(--primary)] ring-offset-2 ring-offset-[var(--background)] scale-105 shadow-lg shadow-[var(--primary)]/20 border-[var(--primary)]/50'
+                        : 'hover:scale-[1.02] hover:border-[var(--border-secondary)] hover:shadow-md'
                     }`}
                     style={{
                       left: `${left}px`,
                       width: `${width}px`,
-                      top: `${index * 20}px`,
-                      backgroundColor: clip.color
+                      top: `${index * 28}px`,
+                      background: `linear-gradient(135deg, ${clip.color}dd, ${clip.color}99)`,
                     }}
                   >
-                    <div className="p-2 h-full flex items-center justify-center">
-                      <span className="text-sm font-medium text-white">
+                    <div className="p-3 h-full flex items-center justify-center">
+                      <span className="text-sm font-semibold text-white drop-shadow-sm">
                         {clip.label}
                       </span>
                     </div>
@@ -405,10 +409,10 @@ export default function TransitionsDemo() {
 
             {/* Playhead */}
             <div
-              className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-10 pointer-events-none"
+              className="absolute top-0 bottom-0 w-1 bg-[var(--playhead)] z-10 pointer-events-none shadow-lg shadow-[var(--playhead)]/50"
               style={{ left: `${currentTime * pixelsPerMs}px` }}
             >
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-3 h-3 bg-red-500 rotate-45" />
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-4 h-4 bg-[var(--playhead)] rotate-45 shadow-lg shadow-[var(--playhead)]/50" />
             </div>
           </div>
         </div>

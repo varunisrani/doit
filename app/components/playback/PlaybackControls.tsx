@@ -97,7 +97,15 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   };
 
   return (
-    <div className={`flex flex-col gap-3 bg-zinc-900 border border-zinc-800 rounded-lg p-4 ${className}`}>
+    <div
+      className={`flex flex-col gap-4 p-6 transition-all duration-200 ${className}`}
+      style={{
+        background: 'var(--surface-elevated)',
+        border: `1px solid var(--border-primary)`,
+        borderRadius: 'var(--lg)',
+        boxShadow: 'var(--shadow-lg)',
+      }}
+    >
       {/* Time scrubber */}
       {showScrubber && (
         <div className="w-full">
@@ -113,18 +121,40 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
         </div>
       )}
 
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-6">
         {/* Time Display */}
         {showTimeDisplay && (
-          <div className="flex items-center gap-2 text-sm font-mono text-zinc-400 min-w-[140px]">
-            <span className="text-white">{formatTime(currentTime)}</span>
-            <span>/</span>
-            <span>{formatTime(duration)}</span>
+          <div
+            className="flex items-center gap-3 px-4 py-2 rounded-lg min-w-[160px]"
+            style={{
+              background: 'var(--surface)',
+              border: `1px solid var(--border-primary)`,
+            }}
+          >
+            <div className="flex items-center gap-2 text-sm font-mono">
+              <span
+                className="font-semibold"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                {formatTime(currentTime)}
+              </span>
+              <span
+                className="opacity-60"
+                style={{ color: 'var(--text-tertiary)' }}
+              >
+                /
+              </span>
+              <span
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                {formatTime(duration)}
+              </span>
+            </div>
           </div>
         )}
 
         {/* Main Playback Controls */}
-        <div className="flex items-center gap-1 flex-1 justify-center">
+        <div className="flex items-center gap-2 flex-1 justify-center">
           {/* Jump to Start */}
           {showSkipButtons && (
             <IconButton
@@ -142,7 +172,7 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             <IconButton
               icon={<Rewind />}
               size="md"
-              variant="ghost"
+              variant="secondary"
               onClick={() => skipBackward(5)}
               aria-label="Skip backward 5 seconds"
               title="Skip backward 5s (←)"
@@ -169,13 +199,14 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             onClick={togglePlayPause}
             aria-label={isPlaying ? 'Pause' : 'Play'}
             title={isPlaying ? 'Pause (Space/K)' : 'Play (Space/K)'}
+            className="transition-all duration-200 hover:scale-105"
           />
 
           {/* Stop */}
           <IconButton
             icon={<Square />}
             size="md"
-            variant="ghost"
+            variant="secondary"
             onClick={stop}
             aria-label="Stop"
             title="Stop and reset"
@@ -198,7 +229,7 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             <IconButton
               icon={<FastForward />}
               size="md"
-              variant="ghost"
+              variant="secondary"
               onClick={() => skipForward(5)}
               aria-label="Skip forward 5 seconds"
               title="Skip forward 5s (→)"
@@ -219,23 +250,23 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
         </div>
 
         {/* Secondary Controls */}
-        <div className="flex items-center gap-2 min-w-[160px] justify-end">
+        <div className="flex items-center gap-3 min-w-[180px] justify-end">
           {/* Loop Toggle */}
           {showLoopButton && (
             <IconButton
               icon={<Repeat />}
               size="md"
-              variant="ghost"
-              active={loop}
+              variant={loop ? "primary" : "ghost"}
               onClick={toggleLoop}
               aria-label="Toggle loop"
               title={loop ? 'Loop enabled' : 'Loop disabled'}
+              className="transition-all duration-200"
             />
           )}
 
           {/* Speed Control */}
           {showSpeedControl && (
-            <div className="w-20">
+            <div className="w-24">
               <Dropdown
                 options={speedOptions}
                 value={currentSpeedValue}
@@ -247,15 +278,94 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
         </div>
       </div>
 
+      {/* Progress indicator */}
+      {showScrubber && (
+        <div className="flex items-center gap-2">
+          <div
+            className="flex-1 h-1 rounded-full overflow-hidden"
+            style={{
+              background: 'var(--surface)',
+            }}
+          >
+            <div
+              className="h-full transition-all duration-200 rounded-full"
+              style={{
+                width: `${(currentTime / duration) * 100}%`,
+                background: 'var(--primary)',
+              }}
+            />
+          </div>
+          <div
+            className="text-xs font-medium"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            {Math.round((currentTime / duration) * 100)}%
+          </div>
+        </div>
+      )}
+
       {/* Keyboard Shortcuts Info (optional, can be toggled) */}
       {process.env.NODE_ENV === 'development' && (
-        <div className="text-xs text-zinc-600 mt-2 pt-2 border-t border-zinc-800">
-          <div className="flex flex-wrap gap-x-4 gap-y-1">
-            <span>Space/K: Play/Pause</span>
-            <span>J/L: Previous/Next Frame</span>
-            <span>←/→: Skip 1s</span>
-            <span>Shift+←/→: Start/End</span>
-            <span>Home/End: Start/End</span>
+        <div
+          className="text-xs pt-4 border-t"
+          style={{
+            color: 'var(--text-tertiary)',
+            borderColor: 'var(--border-primary)',
+          }}
+        >
+          <div className="grid grid-cols-2 gap-x-6 gap-y-1">
+            <div className="flex items-center gap-2">
+              <kbd
+                className="px-1.5 py-0.5 rounded text-xs"
+                style={{
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border-primary)',
+                  color: 'var(--text-secondary)',
+                }}
+              >
+                Space/K
+              </kbd>
+              <span>Play/Pause</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <kbd
+                className="px-1.5 py-0.5 rounded text-xs"
+                style={{
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border-primary)',
+                  color: 'var(--text-secondary)',
+                }}
+              >
+                J/L
+              </kbd>
+              <span>Previous/Next Frame</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <kbd
+                className="px-1.5 py-0.5 rounded text-xs"
+                style={{
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border-primary)',
+                  color: 'var(--text-secondary)',
+                }}
+              >
+                ←/→
+              </kbd>
+              <span>Skip 1s</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <kbd
+                className="px-1.5 py-0.5 rounded text-xs"
+                style={{
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border-primary)',
+                  color: 'var(--text-secondary)',
+                }}
+              >
+                Home/End
+              </kbd>
+              <span>Start/End</span>
+            </div>
           </div>
         </div>
       )}

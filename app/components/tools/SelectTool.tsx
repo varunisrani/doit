@@ -106,57 +106,69 @@ export const SelectTool: React.FC<SelectToolProps> = ({
 
   if (!selectedElement) {
     return (
-      <div className="bg-gray-800 rounded-lg p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Move className="w-5 h-5 text-blue-400" />
-          <h3 className="text-white font-semibold">Select Tool</h3>
+      <div className="panel p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'var(--primary)' }}>
+            <Move className="w-5 h-5 text-white" />
+          </div>
+          <h3 className="text-[var(--text-primary)] font-semibold text-lg">Select Tool</h3>
         </div>
-        <p className="text-sm text-gray-400">
-          Click on an element to select and edit it.
+        <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+          Click on an element to select and edit it. Use <kbd className="px-1 py-0.5 rounded text-xs" style={{ background: 'var(--surface)', border: '1px solid var(--border-secondary)', color: 'var(--text-primary)' }}>Shift+Click</kbd> for multiple selection.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-800 rounded-lg p-4 space-y-4">
-      <div className="flex items-center gap-2">
-        <Move className="w-5 h-5 text-blue-400" />
-        <h3 className="text-white font-semibold">Selected Element</h3>
+    <div className="panel p-6 space-y-6">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'var(--primary)' }}>
+          <Move className="w-5 h-5 text-white" />
+        </div>
+        <h3 className="text-[var(--text-primary)] font-semibold text-lg">Selected Element</h3>
       </div>
 
-      {/* Element Info */}
-      <div className="space-y-2 text-sm">
-        <div className="flex justify-between text-gray-300">
-          <span>ID:</span>
-          <span className="text-gray-400 font-mono">{selectedElement.id}</span>
+      {/* Modern Element Info */}
+      <div
+        className="p-4 rounded-lg border border-[var(--border-secondary)] space-y-3"
+        style={{ background: 'var(--surface-hover)' }}
+      >
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-[var(--text-secondary)]">ID:</span>
+          <span className="text-[var(--text-primary)] font-mono text-xs px-2 py-1 rounded" style={{ background: 'var(--surface)', border: '1px solid var(--border-primary)' }}>
+            {selectedElement.id}
+          </span>
         </div>
-        <div className="flex justify-between text-gray-300">
-          <span>Position:</span>
-          <span className="text-gray-400">
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-[var(--text-secondary)]">Position:</span>
+          <span className="text-[var(--text-primary)] font-mono font-medium">
             X: {Math.round(selectedElement.x)}, Y: {Math.round(selectedElement.y)}
           </span>
         </div>
-        <div className="flex justify-between text-gray-300">
-          <span>Size:</span>
-          <span className="text-gray-400">
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-[var(--text-secondary)]">Size:</span>
+          <span className="text-[var(--text-primary)] font-mono font-medium">
             {Math.round(selectedElement.width)} × {Math.round(selectedElement.height)}
           </span>
         </div>
         {selectedElement.rotation !== undefined && (
-          <div className="flex justify-between text-gray-300">
-            <span>Rotation:</span>
-            <span className="text-gray-400">{Math.round(selectedElement.rotation)}°</span>
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-[var(--text-secondary)]">Rotation:</span>
+            <span className="text-[var(--accent)] font-mono font-medium">{Math.round(selectedElement.rotation)}°</span>
           </div>
         )}
       </div>
 
       {/* Position Controls */}
-      <div className="border-t border-gray-700 pt-4">
-        <label className="text-sm text-gray-300 block mb-2">Position</label>
-        <div className="grid grid-cols-2 gap-2">
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="w-1 h-4 rounded-full" style={{ backgroundColor: 'var(--primary)' }}></div>
+          <label className="text-sm font-medium text-[var(--text-primary)]">Position</label>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs text-gray-400 block mb-1">X</label>
+            <label className="text-xs text-[var(--text-secondary)] block mb-2">X</label>
             <input
               type="number"
               value={Math.round(selectedElement.x)}
@@ -164,11 +176,19 @@ export const SelectTool: React.FC<SelectToolProps> = ({
                 onMove && onMove(selectedElement.id, Number(e.target.value), selectedElement.y)
               }
               disabled={selectedElement.locked}
-              className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none disabled:opacity-50"
+              className="input"
+              style={{
+                width: '100%',
+                padding: 'var(--space-2) var(--space-3)',
+                fontSize: '0.875rem',
+                background: 'var(--surface)',
+                border: '1px solid var(--border-primary)',
+                color: 'var(--text-primary)',
+              }}
             />
           </div>
           <div>
-            <label className="text-xs text-gray-400 block mb-1">Y</label>
+            <label className="text-xs text-[var(--text-secondary)] block mb-2">Y</label>
             <input
               type="number"
               value={Math.round(selectedElement.y)}
@@ -176,18 +196,29 @@ export const SelectTool: React.FC<SelectToolProps> = ({
                 onMove && onMove(selectedElement.id, selectedElement.x, Number(e.target.value))
               }
               disabled={selectedElement.locked}
-              className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none disabled:opacity-50"
+              className="input"
+              style={{
+                width: '100%',
+                padding: 'var(--space-2) var(--space-3)',
+                fontSize: '0.875rem',
+                background: 'var(--surface)',
+                border: '1px solid var(--border-primary)',
+                color: 'var(--text-primary)',
+              }}
             />
           </div>
         </div>
       </div>
 
       {/* Size Controls */}
-      <div className="border-t border-gray-700 pt-4">
-        <label className="text-sm text-gray-300 block mb-2">Size</label>
-        <div className="grid grid-cols-2 gap-2">
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="w-1 h-4 rounded-full" style={{ backgroundColor: 'var(--accent)' }}></div>
+          <label className="text-sm font-medium text-[var(--text-primary)]">Size</label>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs text-gray-400 block mb-1">Width</label>
+            <label className="text-xs text-[var(--text-secondary)] block mb-2">Width</label>
             <input
               type="number"
               value={Math.round(selectedElement.width)}
@@ -197,11 +228,19 @@ export const SelectTool: React.FC<SelectToolProps> = ({
               }
               disabled={selectedElement.locked}
               min="20"
-              className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none disabled:opacity-50"
+              className="input"
+              style={{
+                width: '100%',
+                padding: 'var(--space-2) var(--space-3)',
+                fontSize: '0.875rem',
+                background: 'var(--surface)',
+                border: '1px solid var(--border-primary)',
+                color: 'var(--text-primary)',
+              }}
             />
           </div>
           <div>
-            <label className="text-xs text-gray-400 block mb-1">Height</label>
+            <label className="text-xs text-[var(--text-secondary)] block mb-2">Height</label>
             <input
               type="number"
               value={Math.round(selectedElement.height)}
@@ -211,7 +250,15 @@ export const SelectTool: React.FC<SelectToolProps> = ({
               }
               disabled={selectedElement.locked}
               min="20"
-              className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none disabled:opacity-50"
+              className="input"
+              style={{
+                width: '100%',
+                padding: 'var(--space-2) var(--space-3)',
+                fontSize: '0.875rem',
+                background: 'var(--surface)',
+                border: '1px solid var(--border-primary)',
+                color: 'var(--text-primary)',
+              }}
             />
           </div>
         </div>
@@ -219,10 +266,13 @@ export const SelectTool: React.FC<SelectToolProps> = ({
 
       {/* Rotation Control */}
       {selectedElement.rotation !== undefined && (
-        <div className="border-t border-gray-700 pt-4">
-          <label className="text-sm text-gray-300 block mb-2">
-            Rotation: {Math.round(selectedElement.rotation)}°
-          </label>
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-4 rounded-full" style={{ backgroundColor: 'var(--info)' }}></div>
+            <label className="text-sm font-medium text-[var(--text-primary)]">
+              Rotation: {Math.round(selectedElement.rotation)}°
+            </label>
+          </div>
           <input
             type="range"
             value={selectedElement.rotation}
@@ -230,16 +280,22 @@ export const SelectTool: React.FC<SelectToolProps> = ({
             disabled={selectedElement.locked}
             min="0"
             max="360"
-            className="w-full accent-blue-500 disabled:opacity-50"
+            className="w-full"
+            style={{
+              accentColor: 'var(--primary)',
+            }}
           />
         </div>
       )}
 
-      {/* Actions */}
-      <div className="border-t border-gray-700 pt-4 space-y-2">
+      {/* Modern Actions */}
+      <div className="space-y-3 pt-4 border-t border-[var(--border-primary)]">
         <button
           onClick={() => onLock && onLock(selectedElement.id, !selectedElement.locked)}
-          className="w-full px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors flex items-center justify-center gap-2"
+          className={`btn w-full flex items-center justify-center gap-2 ${
+            selectedElement.locked ? 'btn-warning' : 'btn-secondary'
+          }`}
+          style={{ minHeight: '44px' }}
         >
           {selectedElement.locked ? (
             <>
@@ -257,7 +313,8 @@ export const SelectTool: React.FC<SelectToolProps> = ({
         <button
           onClick={() => onDuplicate && onDuplicate(selectedElement.id)}
           disabled={selectedElement.locked}
-          className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn btn-primary w-full flex items-center justify-center gap-2"
+          style={{ minHeight: '44px' }}
         >
           <Copy className="w-4 h-4" />
           Duplicate
@@ -266,7 +323,8 @@ export const SelectTool: React.FC<SelectToolProps> = ({
         <button
           onClick={() => onDelete && onDelete(selectedElement.id)}
           disabled={selectedElement.locked}
-          className="w-full px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn btn-danger w-full flex items-center justify-center gap-2"
+          style={{ minHeight: '44px' }}
         >
           <Trash2 className="w-4 h-4" />
           Delete
