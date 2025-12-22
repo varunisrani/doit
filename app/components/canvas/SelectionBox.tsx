@@ -25,8 +25,8 @@ export default function SelectionBox({ x, y, width, height }: SelectionBoxProps)
         width: actualWidth,
         height: actualHeight,
         border: '2px dashed var(--primary)',
-        backgroundColor: 'rgba(37, 99, 235, 0.08)', // Using var(--primary) with opacity
-        boxShadow: '0 0 0 1px rgba(37, 99, 235, 0.2), inset 0 0 0 1px rgba(37, 99, 235, 0.1)',
+        backgroundColor: 'rgba(220, 38, 38, 0.08)', // Using var(--primary) with opacity
+        boxShadow: '0 0 0 1px rgba(220, 38, 38, 0.2), inset 0 0 0 1px rgba(220, 38, 38, 0.1)',
         animation: 'fadeIn 0.2s ease-out',
       }}
     >
