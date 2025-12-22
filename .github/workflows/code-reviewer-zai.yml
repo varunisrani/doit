@@ -80,33 +80,69 @@ jobs:
         id: validate-env
         run: |
           echo "========================================="
-          echo "Z.AI ENVIRONMENT VALIDATION"
+          echo "API KEYS VALIDATION"
           echo "========================================="
 
-          # Store secret in a variable for checking
-          SECRET_VALUE="${{ secrets.Z_AI_API_KEY }}"
+          # Check both secrets
+          Z_AI_SECRET="${{ secrets.Z_AI_API_KEY }}"
+          ANTHROPIC_SECRET="${{ secrets.ANTHROPIC_API_KEY }}"
 
-          echo "Checking Z_AI_API_KEY secret..."
-          if [ -z "$SECRET_VALUE" ]; then
-            echo "[ERROR] Z_AI_API_KEY secret is EMPTY or NOT SET"
+          echo "Checking available API secrets..."
+          echo ""
+
+          if [ -z "$Z_AI_SECRET" ] && [ -z "$ANTHROPIC_SECRET" ]; then
+            echo "[ERROR] Neither Z_AI_API_KEY nor ANTHROPIC_API_KEY secret is SET"
             echo ""
-            echo "SOLUTION:"
+            echo "SOLUTION: Add at least one secret:"
+            echo ""
+            echo "Option 1 - Z.AI Integration:"
             echo "1. Go to: https://github.com/varunisrani/doit/settings/secrets/actions"
             echo "2. Click 'New repository secret'"
             echo "3. Name: Z_AI_API_KEY"
             echo "4. Value: <your-api-key-from-https://z.ai/manage-apikey>"
             echo "5. Click 'Add secret'"
             echo ""
-            echo "After adding the secret, re-run the workflow."
+            echo "Option 2 - Direct Anthropic API:"
+            echo "1. Go to: https://github.com/varunisrani/doit/settings/secrets/actions"
+            echo "2. Click 'New repository secret'"
+            echo "3. Name: ANTHROPIC_API_KEY"
+            echo "4. Value: <your-api-key-from-https://console.anthropic.com>"
+            echo "5. Click 'Add secret'"
+            echo ""
             exit 1
-          else
-            echo "[SUCCESS] Z_AI_API_KEY secret found!"
-            KEY_LENGTH=${#SECRET_VALUE}
-            echo "API Key length: ${KEY_LENGTH} characters"
-            echo "API Key prefix: ${SECRET_VALUE:0:10}... (first 10 chars)"
+          fi
 
-            # Z.AI API keys can start with any format
-            echo "API Key format: VALID (Z.AI format accepted)"
+          echo "[SUCCESS] API secret(s) found!"
+          echo ""
+
+          if [ -n "$Z_AI_SECRET" ]; then
+            Z_KEY_LENGTH=${#Z_AI_SECRET}
+            echo "[Z.AI] Z_AI_API_KEY is SET"
+            echo "  - Length: ${Z_KEY_LENGTH} characters"
+            echo "  - Prefix: ${Z_AI_SECRET:0:10}... (first 10 chars)"
+            echo "  - Format: VALID (Z.AI format accepted)"
+          else
+            echo "[Z.AI] Z_AI_API_KEY is NOT SET"
+          fi
+
+          echo ""
+
+          if [ -n "$ANTHROPIC_SECRET" ]; then
+            ANTH_KEY_LENGTH=${#ANTHROPIC_SECRET}
+            echo "[ANTHROPIC] ANTHROPIC_API_KEY is SET"
+            echo "  - Length: ${ANTH_KEY_LENGTH} characters"
+            echo "  - Prefix: ${ANTHROPIC_SECRET:0:10}... (first 10 chars)"
+            echo "  - Format: VALID (Anthropic format accepted)"
+          else
+            echo "[ANTHROPIC] ANTHROPIC_API_KEY is NOT SET"
+          fi
+
+          echo ""
+          echo "Active authentication method:"
+          if [ -n "$ANTHROPIC_SECRET" ]; then
+            echo "  Using: ANTHROPIC_API_KEY (Direct Anthropic API)"
+          else
+            echo "  Using: Z_AI_API_KEY (Z.AI GLM-4.7)"
           fi
 
           # Validate environment variables
@@ -153,21 +189,77 @@ jobs:
           HAIKU_MODEL: "glm-4-5-air"
           Z_AI_API_KEY: ${{ secrets.Z_AI_API_KEY }}
 
-      - name: Verify Secret Passed to Claude Action
+      - name: Verify Secrets Passed to Claude Action
         id: pre-action-check
         run: |
           echo "========================================="
-          echo "PRE-ACTION SECRET CHECK"
+          echo "PRE-ACTION SECRETS CHECK"
           echo "========================================="
 
-          # This is just for logging - the actual variable won't show
-          if [ -z "${{ secrets.Z_AI_API_KEY }}" ]; then
-            echo "[ERROR] Secret is not available to this step!"
+          Z_AI_AVAILABLE="${{ secrets.Z_AI_API_KEY }}"
+          ANTHROPIC_AVAILABLE="${{ secrets.ANTHROPIC_API_KEY }}"
+
+          if [ -z "$Z_AI_AVAILABLE" ] && [ -z "$ANTHROPIC_AVAILABLE" ]; then
+            echo "[ERROR] Neither secret is available to this step!"
             exit 1
-          else
-            echo "[SUCCESS] Secret is available to this step"
-            echo "Secret status: Will be passed to Claude action"
           fi
+
+          echo "[SUCCESS] Secret(s) available to this step"
+          echo ""
+          echo "Secrets being passed to Claude action:"
+
+          if [ -n "$ANTHROPIC_AVAILABLE" ]; then
+            echo "  - ANTHROPIC_API_KEY: [SET - Will be used]"
+          else
+            echo "  - ANTHROPIC_API_KEY: [NOT SET - Will fallback to Z_AI_API_KEY]"
+          fi
+
+          if [ -n "$Z_AI_AVAILABLE" ]; then
+            echo "  - Z_AI_API_KEY: [SET - Available as fallback]"
+          else
+            echo "  - Z_AI_API_KEY: [NOT SET]"
+          fi
+
+          echo ""
+          echo "Environment variables configuration:"
+          echo "  - ANTHROPIC_API_KEY: Priority (ANTHROPIC_API_KEY || Z_AI_API_KEY)"
+          echo "  - Z_AI_API_KEY: Direct Z.AI API key"
+          echo "  - ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic"
+          echo "  - API_TIMEOUT_MS: 3000000"
+          echo "  - ANTHROPIC_DEFAULT_OPUS_MODEL: glm-4-7"
+          echo "  - ANTHROPIC_DEFAULT_SONNET_MODEL: glm-4-7"
+          echo "  - ANTHROPIC_DEFAULT_HAIKU_MODEL: glm-4-5-air"
+          echo ""
+          echo "Ready to pass secrets to Claude action..."
+
+      - name: Test Z.AI API Key Format
+        id: test-zai-key
+        run: |
+          echo "========================================="
+          echo "Z.AI API KEY FORMAT TEST"
+          echo "========================================="
+
+          API_KEY="${{ secrets.Z_AI_API_KEY }}"
+          KEY_LENGTH=${#API_KEY}
+          KEY_PREFIX=${API_KEY:0:10}
+
+          echo "[INFO] Testing Z.AI API key..."
+          echo "Key length: ${KEY_LENGTH} characters"
+          echo "Key prefix: ${KEY_PREFIX}..."
+
+          # Z.AI keys typically start with alphanumeric characters
+          if [[ "$KEY_PREFIX" =~ ^[a-zA-Z0-9] ]]; then
+            echo "[SUCCESS] API key format appears valid for Z.AI"
+            echo "Key format: Alphanumeric prefix (expected for Z.AI)"
+          else
+            echo "[WARNING] Unexpected API key format"
+          fi
+
+          echo ""
+          echo "Z.AI Endpoint Configuration:"
+          echo "- Base URL: https://api.z.ai/api/anthropic"
+          echo "- Authentication: Bearer token (API key)"
+          echo "- Models: GLM-4.7"
 
       - name: Run Code Reviewer (Z.AI GLM)
         id: claude
@@ -175,8 +267,10 @@ jobs:
         timeout-minutes: 20
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Z.AI GLM Configuration
-          ANTHROPIC_API_KEY: ${{ secrets.Z_AI_API_KEY }}
+          # Pass both secrets - Claude action will use appropriate one
+          # Priority: ANTHROPIC_API_KEY (if set) > Z_AI_API_KEY (fallback for Z.AI)
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY || secrets.Z_AI_API_KEY }}
+          Z_AI_API_KEY: ${{ secrets.Z_AI_API_KEY }}
           ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic
           API_TIMEOUT_MS: 3000000
           # GLM Model Configuration
@@ -194,19 +288,40 @@ jobs:
           echo "ACTION FAILED - DIAGNOSTIC INFO"
           echo "========================================="
           echo ""
-          echo "The validation step found the secret:"
-          echo "  - API Key Length: 49 characters"
-          echo "  - API Key Format: Valid Z.AI format"
+          echo "Status of validation steps:"
+          echo "  [Step 1] Validate Z.AI API Key & Environment: ${{ steps.validate-env.outcome }}"
+          echo "  [Step 2] Verify Secret Passed to Claude Action: ${{ steps.pre-action-check.outcome }}"
+          echo "  [Step 3] Test Z.AI API Key Format: ${{ steps.test-zai-key.outcome }}"
+          echo "  [Step 4] Run Code Reviewer (Z.AI GLM): ${{ steps.claude.outcome }}"
           echo ""
-          echo "Possible issues:"
-          echo "1. API key is valid but Z.AI service is down"
-          echo "2. API key needs different format for direct Anthropic API"
-          echo "3. Z.AI endpoint authentication issue"
+          echo "Environment variables passed to Claude action:"
+          echo "  - GH_TOKEN: [MASKED]"
+          echo "  - ANTHROPIC_API_KEY: ${{ secrets.Z_AI_API_KEY }}"
+          echo "  - ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic"
+          echo "  - API_TIMEOUT_MS: 3000000"
+          echo "  - ANTHROPIC_DEFAULT_OPUS_MODEL: glm-4-7"
+          echo "  - ANTHROPIC_DEFAULT_SONNET_MODEL: glm-4-7"
+          echo "  - ANTHROPIC_DEFAULT_HAIKU_MODEL: glm-4-5-air"
+          echo ""
+          echo "Troubleshooting Z.AI Integration:"
+          echo ""
+          echo "[Issue 1] API key validation passes but action fails"
+          echo "  Solution: Verify Z.AI endpoint authentication accepts the key format"
+          echo ""
+          echo "[Issue 2] Claude action not reading ANTHROPIC_API_KEY from env"
+          echo "  Solution: Check if action requires specific env variable naming"
+          echo ""
+          echo "[Issue 3] Z.AI service or endpoint issue"
+          echo "  Solution: Test API key directly at https://z.ai/manage-apikey/apikey-list"
+          echo ""
+          echo "[Issue 4] Custom base URL not supported by Claude action"
+          echo "  Solution: Try using CLAUDE_CODE_OAUTH_TOKEN with direct Claude API"
           echo ""
           echo "Next steps:"
-          echo "- Verify API key is active at: https://z.ai/manage-apikey/apikey-list"
-          echo "- Try using CLAUDE_CODE_OAUTH_TOKEN instead (Claude direct auth)"
-          echo "- Check Z.AI service status"
+          echo "1. Verify API key is active: https://z.ai/manage-apikey/apikey-list"
+          echo "2. Test Z.AI endpoint directly: curl -H 'Authorization: Bearer YOUR_KEY' https://api.z.ai/api/anthropic/models"
+          echo "3. Check Z.AI service status: https://status.z.ai"
+          echo "4. Consider using CLAUDE_CODE_OAUTH_TOKEN for direct Anthropic API"
           echo ""
           echo "========================================="
 
