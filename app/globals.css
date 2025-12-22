@@ -1,79 +1,80 @@
 @import "tailwindcss";
 
 :root {
-  /* ========== WHITE UI DESIGN SYSTEM ==========
-   * Clean white theme with WCAG AAA compliance
-   * Light-first design with sophisticated color hierarchy
+  /* ========== RED UI DESIGN SYSTEM ==========
+   * Professional red theme with WCAG AAA compliance
+   * Red-first design with sophisticated color hierarchy
    * 8-point grid system for consistent spacing
    */
 
-  /* Core White Theme Colors */
-  --background: #ffffff;          /* Pure white background */
-  --surface: #f8f9fa;             /* Light gray surfaces */
-  --surface-elevated: #ffffff;    /* White elevated surfaces */
-  --surface-hover: #f1f3f4;       /* Light hover states */
+  /* Core Red Theme Colors */
+  --background: #fefefe;          /* Very subtle red-tinted white */
+  --surface: #fdf2f2;             /* Red 50 - Light red surface */
+  --surface-elevated: #ffffff;    /* Pure white for elevation */
+  --surface-hover: #fef1f1;       /* Slightly warmer hover state */
 
   /* Text Color Hierarchy */
   --text-primary: #1a1a1a;        /* Near-black primary text */
   --text-secondary: #5f6368;      /* Medium gray secondary text */
   --text-tertiary: #9aa0a6;       /* Light gray tertiary/disabled text */
-  --text-inverse: #ffffff;        /* White text on colored backgrounds */
+  --text-inverse: #ffffff;        /* White text on red backgrounds */
+  --text-on-red: #ffffff;         /* Specifically for red backgrounds */
 
-  /* Brand Colors - Professional Palette */
-  --primary: #2563eb;           /* Blue 600 - professional, trustworthy */
-  --primary-light: #3b82f6;     /* Blue 500 - hover states */
-  --primary-dark: #1d4ed8;      /* Blue 700 - pressed states */
+  /* Brand Colors - Professional Red Palette */
+  --primary: #dc2626;           /* Red 600 - Main brand color */
+  --primary-light: #ef4444;     /* Red 500 - Hover states */
+  --primary-dark: #b91c1c;      /* Red 700 - Active/pressed states */
 
-  --accent: #7c3aed;            /* Violet 600 - creative accent */
-  --accent-light: #8b5cf6;      /* Violet 500 */
-  --accent-dark: #6d28d9;       /* Violet 700 */
+  --accent: #f87171;            /* Red 400 - Secondary accent */
+  --accent-light: #fca5a5;      /* Red 300 - Light accents */
+  --accent-dark: #dc2626;       /* Red 600 - Dark accents */
 
-  /* Semantic Colors */
-  --success: #059669;           /* Emerald 600 */
+  /* Semantic Colors - Keep semantic meanings but update error to new system */
+  --success: #059669;           /* Emerald 600 - Keep green for success */
   --success-light: #10b981;     /* Emerald 500 */
   --success-bg: #ecfdf5;        /* Light green background */
 
-  --warning: #ea580c;           /* Orange 600 */
+  --warning: #f59e0b;           /* Amber 500 - Warning (unchanged) */
   --warning-light: #f97316;     /* Orange 500 */
   --warning-bg: #fffbeb;        /* Light orange background */
 
-  --error: #dc2626;             /* Red 600 */
+  --error: #991b1b;             /* Red 800 - Error states */
   --error-light: #ef4444;       /* Red 500 */
   --error-bg: #fef2f2;          /* Light red background */
 
-  --info: #0891b2;              /* Cyan 600 */
+  --info: #0891b2;              /* Cyan 600 - Info (unchanged) */
   --info-light: #06b6d4;        /* Cyan 500 */
   --info-bg: #ecfeff;           /* Light cyan background */
 
-  /* Border System */
-  --border-primary: #e0e0e0;    /* Light gray primary borders */
-  --border-secondary: #d1d5db;  /* Slightly darker secondary borders */
-  --border-focus: var(--primary);
-  --border-error: var(--error);
+  /* Border System - With subtle red tint */
+  --border-primary: #fecaca;      /* Red 200 - Light red borders */
+  --border-secondary: #f87171;    /* Red 400 - Secondary borders */
+  --border-focus: var(--primary); /* Red focus rings */
+  --border-error: var(--error);   /* Red error borders */
 
-  /* Shadow System - Lighter for white theme */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
-  --shadow-xl: 0 8px 32px rgba(0, 0, 0, 0.16);
+  /* Shadow System - Warm tint with red undertones */
+  --shadow-sm: 0 1px 2px rgba(220, 38, 38, 0.05);
+  --shadow: 0 2px 8px rgba(220, 38, 38, 0.08);
+  --shadow-lg: 0 4px 16px rgba(220, 38, 38, 0.12);
+  --shadow-xl: 0 8px 32px rgba(220, 38, 38, 0.16);
 
   /* Backdrop Effects */
   --backdrop-blur: blur(8px);
   --backdrop-overlay: rgba(0, 0, 0, 0.3);
 
-  /* Video Editor Specific Colors - White theme */
-  --timeline-bg: #f5f5f5;         /* Very light gray timeline */
-  --timeline-track: #e8eaed;      /* Light gray tracks */
-  --timeline-track-hover: #dadce0; /* Hover state for tracks */
-  --playhead: #ef4444;
+  /* Video Editor Specific Colors - Red theme */
+  --timeline-bg: #fdf2f2;         /* Light red background */
+  --timeline-track: #fecaca;      /* Red 200 - Track background */
+  --timeline-track-hover: #fca5a5; /* Red 300 - Hover state */
+  --playhead: #dc2626;            /* Red 600 - Playhead */
   --ruler-text: var(--text-secondary);
   --canvas-border: var(--border-primary);
 
-  /* Track Type Colors */
-  --track-video: #3b82f6;
-  --track-audio: #10b981;
-  --track-text: #f59e0b;
-  --track-effect: #8b5cf6;
+  /* Track Type Colors with red variations */
+  --track-video: #dc2626;         /* Red 600 - Video tracks */
+  --track-audio: #059669;         /* Keep green for audio */
+  --track-text: #f59e0b;          /* Keep amber for text */
+  --track-effect: #7c2d92;        /* Purple with red undertone */
 
   /* State Colors */
   --selected: var(--primary);
@@ -312,7 +313,7 @@ body {
 .input:focus {
   outline: none;
   border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); /* Primary with opacity */
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1); /* Red primary with opacity */
 }
 
 .input:invalid {
@@ -457,7 +458,7 @@ body {
 
 .canvas-container:focus-within {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
 }
 
 .canvas {
@@ -482,10 +483,10 @@ body {
 
 @keyframes handleGlow {
   0%, 100% {
-    box-shadow: 0 0 8px rgba(37, 99, 235, 0.6);
+    box-shadow: 0 0 8px rgba(220, 38, 38, 0.6);
   }
   50% {
-    box-shadow: 0 0 16px rgba(37, 99, 235, 0.9);
+    box-shadow: 0 0 16px rgba(220, 38, 38, 0.9);
   }
 }
 

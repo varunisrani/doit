@@ -137,14 +137,14 @@ export default function TransformControls({ elements, zoom }: TransformControlsP
           transform: `scale(${isActive ? 1.4 : 1})`,
           transition: activeHandle ? 'none' : 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease',
           boxShadow: isActive
-            ? '0 0 0 4px rgba(37, 99, 235, 0.2), 0 4px 12px rgba(0, 0, 0, 0.3)'
+            ? '0 0 0 4px rgba(220, 38, 38, 0.2), 0 4px 12px rgba(0, 0, 0, 0.3)'
             : '0 2px 8px rgba(0, 0, 0, 0.2)',
         }}
         onMouseDown={(e) => handleMouseDown(e, handleType)}
         onMouseEnter={(e) => {
           if (!isActive) {
             e.currentTarget.style.transform = 'scale(1.2)';
-            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.15), 0 4px 12px rgba(0, 0, 0, 0.25)';
+            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.15), 0 4px 12px rgba(0, 0, 0, 0.25)';
           }
         }}
         onMouseLeave={(e) => {
@@ -187,10 +187,10 @@ export default function TransformControls({ elements, zoom }: TransformControlsP
           height,
           border: '2px solid var(--primary)',
           borderRadius: '2px',
-          boxShadow: '0 0 0 1px rgba(37, 99, 235, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
+          boxShadow: '0 0 0 1px rgba(220, 38, 38, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
           transformOrigin: 'center',
           transform: `rotate(${rotation}rad)`,
-          backgroundColor: 'rgba(37, 99, 235, 0.02)',
+          backgroundColor: 'rgba(220, 38, 38, 0.02)',
         }}
       >
         {/* Corner indicators */}
