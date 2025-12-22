@@ -267,9 +267,8 @@ jobs:
         timeout-minutes: 20
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Z.AI API Key - Pass directly as ANTHROPIC_API_KEY
-          ANTHROPIC_API_KEY: ${{ secrets.Z_AI_API_KEY }}
-          Z_AI_API_KEY: ${{ secrets.Z_AI_API_KEY }}
+          # Z.AI Authentication (per Z.AI documentation)
+          ANTHROPIC_AUTH_TOKEN: ${{ secrets.Z_AI_API_KEY }}
           ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic
           API_TIMEOUT_MS: 3000000
           # GLM Model Configuration
