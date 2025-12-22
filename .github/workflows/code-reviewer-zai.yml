@@ -100,32 +100,29 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const fs = require('fs');
-
-            // Try to find review output file or use a default message
-            const reviewMessage = `
-## 🔍 Code Review by GLM-4.7 (Z.AI)
-
-**Status**: ✅ Review Complete
-
-The code review has been completed by GLM-4.7 via Z.AI integration.
-
-**Reviewer Notes**:
-- Uses GLM-4.7 Language Model
-- Powered by Z.AI API
-- Comprehensive code quality assessment
-- Architecture and security review included
-
----
-
-*Review powered by GLM-4.7 via Z.AI | Z.AI Code Reviewer*
-            `;
+            const reviewMessage = [
+              '## [REVIEW] Code Review by GLM-4.7 (Z.AI)',
+              '',
+              '**Status**: [SUCCESS] Review Complete',
+              '',
+              'The code review has been completed by GLM-4.7 via Z.AI integration.',
+              '',
+              '**Reviewer Notes**:',
+              '- Uses GLM-4.7 Language Model',
+              '- Powered by Z.AI API',
+              '- Comprehensive code quality assessment',
+              '- Architecture and security review included',
+              '',
+              '---',
+              '',
+              '*Review powered by GLM-4.7 via Z.AI | Z.AI Code Reviewer*'
+            ].join('\n');
 
             await github.rest.pulls.createReview({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.issue.number,
-              body: reviewMessage.trim(),
+              body: reviewMessage,
               event: 'COMMENT'
             });
 
@@ -135,16 +132,18 @@ The code review has been completed by GLM-4.7 via Z.AI integration.
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const message = `✅ **Code Review Complete**
-
-**Reviewer**: GLM-4.7 (Z.AI)
-**Status**: Review finished and analysis provided
-
-The code review has been completed using GLM-4.7 language model via Z.AI.
-
----
-
-🤖 Powered by GLM-4.7 via Z.AI | Fast Code Reviews`;
+            const message = [
+              '[SUCCESS] **Code Review Complete**',
+              '',
+              '**Reviewer**: GLM-4.7 (Z.AI)',
+              '**Status**: Review finished and analysis provided',
+              '',
+              'The code review has been completed using GLM-4.7 language model via Z.AI.',
+              '',
+              '---',
+              '',
+              '[BOT] Powered by GLM-4.7 via Z.AI | Fast Code Reviews'
+            ].join('\n');
 
             if (context.eventName === 'issue_comment') {
               await github.rest.issues.createComment({
@@ -173,11 +172,13 @@ The code review has been completed using GLM-4.7 language model via Z.AI.
         uses: actions/github-script@v7
         with:
           script: |
-            const message = `❌ @${context.actor} - You are not authorized to trigger code review.
-
-Only maintainers can trigger the code reviewer. Please ask a maintainer to run the review command.
-
-**Note**: Code reviews are automatically triggered on all pull requests without needing a command.`;
+            const message = [
+              '[ERROR] @' + context.actor + ' - You are not authorized to trigger code review.',
+              '',
+              'Only maintainers can trigger the code reviewer. Please ask a maintainer to run the review command.',
+              '',
+              '**Note**: Code reviews are automatically triggered on all pull requests without needing a command.'
+            ].join('\n');
 
             const comment = {
               owner: context.repo.owner,
