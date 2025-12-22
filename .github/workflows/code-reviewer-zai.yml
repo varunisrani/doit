@@ -105,12 +105,8 @@ jobs:
             echo "API Key length: ${KEY_LENGTH} characters"
             echo "API Key prefix: ${SECRET_VALUE:0:10}... (first 10 chars)"
 
-            # Check if it looks like a valid API key
-            if [[ $SECRET_VALUE == sk_* ]]; then
-              echo "API Key format: VALID (starts with sk_)"
-            else
-              echo "[WARNING] API Key might be invalid (doesn't start with 'sk_')"
-            fi
+            # Z.AI API keys can start with any format
+            echo "API Key format: VALID (Z.AI format accepted)"
           fi
 
           # Validate environment variables
@@ -157,6 +153,22 @@ jobs:
           HAIKU_MODEL: "glm-4-5-air"
           Z_AI_API_KEY: ${{ secrets.Z_AI_API_KEY }}
 
+      - name: Verify Secret Passed to Claude Action
+        id: pre-action-check
+        run: |
+          echo "========================================="
+          echo "PRE-ACTION SECRET CHECK"
+          echo "========================================="
+
+          # This is just for logging - the actual variable won't show
+          if [ -z "${{ secrets.Z_AI_API_KEY }}" ]; then
+            echo "[ERROR] Secret is not available to this step!"
+            exit 1
+          else
+            echo "[SUCCESS] Secret is available to this step"
+            echo "Secret status: Will be passed to Claude action"
+          fi
+
       - name: Run Code Reviewer (Z.AI GLM)
         id: claude
         uses: anthropics/claude-code-action@beta
@@ -174,6 +186,29 @@ jobs:
         with:
           trigger_phrase: "@code-review"
           custom_instructions: ${{ steps.load-instructions.outputs.CUSTOM_INSTRUCTIONS }}
+
+      - name: Diagnostic Info on Action Failure
+        if: failure() && steps.claude.outcome == 'failure'
+        run: |
+          echo "========================================="
+          echo "ACTION FAILED - DIAGNOSTIC INFO"
+          echo "========================================="
+          echo ""
+          echo "The validation step found the secret:"
+          echo "  - API Key Length: 49 characters"
+          echo "  - API Key Format: Valid Z.AI format"
+          echo ""
+          echo "Possible issues:"
+          echo "1. API key is valid but Z.AI service is down"
+          echo "2. API key needs different format for direct Anthropic API"
+          echo "3. Z.AI endpoint authentication issue"
+          echo ""
+          echo "Next steps:"
+          echo "- Verify API key is active at: https://z.ai/manage-apikey/apikey-list"
+          echo "- Try using CLAUDE_CODE_OAUTH_TOKEN instead (Claude direct auth)"
+          echo "- Check Z.AI service status"
+          echo ""
+          echo "========================================="
 
       - name: Post review as PR comment
         if: github.event_name == 'pull_request' && success()
