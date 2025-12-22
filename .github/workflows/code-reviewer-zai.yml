@@ -76,74 +76,48 @@ jobs:
           echo "Provide comprehensive code review following the structure and guidelines above." >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Validate Z.AI API Key & Environment
+      - name: Validate API Credentials & Environment
         id: validate-env
         run: |
           echo "========================================="
-          echo "API KEYS VALIDATION"
+          echo "API CREDENTIALS VALIDATION"
           echo "========================================="
 
-          # Check both secrets
+          # Check all available credentials
+          OAUTH_TOKEN="${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}"
           Z_AI_SECRET="${{ secrets.Z_AI_API_KEY }}"
-          ANTHROPIC_SECRET="${{ secrets.ANTHROPIC_API_KEY }}"
 
-          echo "Checking available API secrets..."
+          echo "Checking available API credentials..."
           echo ""
 
-          if [ -z "$Z_AI_SECRET" ] && [ -z "$ANTHROPIC_SECRET" ]; then
-            echo "[ERROR] Neither Z_AI_API_KEY nor ANTHROPIC_API_KEY secret is SET"
-            echo ""
-            echo "SOLUTION: Add at least one secret:"
-            echo ""
-            echo "Option 1 - Z.AI Integration:"
-            echo "1. Go to: https://github.com/varunisrani/doit/settings/secrets/actions"
-            echo "2. Click 'New repository secret'"
-            echo "3. Name: Z_AI_API_KEY"
-            echo "4. Value: <your-api-key-from-https://z.ai/manage-apikey>"
-            echo "5. Click 'Add secret'"
-            echo ""
-            echo "Option 2 - Direct Anthropic API:"
-            echo "1. Go to: https://github.com/varunisrani/doit/settings/secrets/actions"
-            echo "2. Click 'New repository secret'"
-            echo "3. Name: ANTHROPIC_API_KEY"
-            echo "4. Value: <your-api-key-from-https://console.anthropic.com>"
-            echo "5. Click 'Add secret'"
-            echo ""
-            exit 1
+          if [ -z "$OAUTH_TOKEN" ]; then
+            echo "[WARNING] CLAUDE_CODE_OAUTH_TOKEN is NOT SET"
+            echo "  Solution: Add Claude Code OAuth token to GitHub secrets"
+            echo "  Go to: https://github.com/varunisrani/doit/settings/secrets/actions"
+          else
+            echo "[SUCCESS] CLAUDE_CODE_OAUTH_TOKEN is SET"
           fi
 
-          echo "[SUCCESS] API secret(s) found!"
           echo ""
 
-          if [ -n "$Z_AI_SECRET" ]; then
+          if [ -z "$Z_AI_SECRET" ]; then
+            echo "[WARNING] Z_AI_API_KEY is NOT SET"
+            echo "  Solution: Add Z.AI API key to GitHub secrets"
+            echo "  Go to: https://z.ai/manage-apikey"
+          else
             Z_KEY_LENGTH=${#Z_AI_SECRET}
-            echo "[Z.AI] Z_AI_API_KEY is SET"
+            echo "[SUCCESS] Z_AI_API_KEY is SET"
             echo "  - Length: ${Z_KEY_LENGTH} characters"
             echo "  - Prefix: ${Z_AI_SECRET:0:10}... (first 10 chars)"
             echo "  - Format: VALID (Z.AI format accepted)"
-          else
-            echo "[Z.AI] Z_AI_API_KEY is NOT SET"
           fi
 
           echo ""
-
-          if [ -n "$ANTHROPIC_SECRET" ]; then
-            ANTH_KEY_LENGTH=${#ANTHROPIC_SECRET}
-            echo "[ANTHROPIC] ANTHROPIC_API_KEY is SET"
-            echo "  - Length: ${ANTH_KEY_LENGTH} characters"
-            echo "  - Prefix: ${ANTHROPIC_SECRET:0:10}... (first 10 chars)"
-            echo "  - Format: VALID (Anthropic format accepted)"
-          else
-            echo "[ANTHROPIC] ANTHROPIC_API_KEY is NOT SET"
-          fi
-
-          echo ""
-          echo "Active authentication method:"
-          if [ -n "$ANTHROPIC_SECRET" ]; then
-            echo "  Using: ANTHROPIC_API_KEY (Direct Anthropic API)"
-          else
-            echo "  Using: Z_AI_API_KEY (Z.AI GLM-4.7)"
-          fi
+          echo "Authentication Strategy:"
+          echo "  - Primary: CLAUDE_CODE_OAUTH_TOKEN (Claude OAuth)"
+          echo "  - Secondary: Z_AI_API_KEY (Z.AI endpoint routing)"
+          echo "  - Endpoint: https://api.z.ai/api/anthropic"
+          echo "  - Models: GLM-4.7 (Opus/Sonnet), GLM-4.5-Air (Haiku)"
 
           # Validate environment variables
           echo ""
@@ -193,44 +167,40 @@ jobs:
         id: pre-action-check
         run: |
           echo "========================================="
-          echo "PRE-ACTION SECRETS CHECK"
+          echo "PRE-ACTION CREDENTIALS CHECK"
           echo "========================================="
 
+          OAUTH_AVAILABLE="${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}"
           Z_AI_AVAILABLE="${{ secrets.Z_AI_API_KEY }}"
-          ANTHROPIC_AVAILABLE="${{ secrets.ANTHROPIC_API_KEY }}"
 
-          if [ -z "$Z_AI_AVAILABLE" ] && [ -z "$ANTHROPIC_AVAILABLE" ]; then
-            echo "[ERROR] Neither secret is available to this step!"
+          if [ -z "$OAUTH_AVAILABLE" ]; then
+            echo "[ERROR] CLAUDE_CODE_OAUTH_TOKEN not available!"
+            echo "Please add CLAUDE_CODE_OAUTH_TOKEN secret"
             exit 1
           fi
 
-          echo "[SUCCESS] Secret(s) available to this step"
+          echo "[SUCCESS] Credentials available to this step"
           echo ""
-          echo "Secrets being passed to Claude action:"
-
-          if [ -n "$ANTHROPIC_AVAILABLE" ]; then
-            echo "  - ANTHROPIC_API_KEY: [SET - Will be used]"
-          else
-            echo "  - ANTHROPIC_API_KEY: [NOT SET - Will fallback to Z_AI_API_KEY]"
-          fi
+          echo "Credentials being passed to Claude action:"
+          echo "  - CLAUDE_CODE_OAUTH_TOKEN: [SET - For authentication]"
 
           if [ -n "$Z_AI_AVAILABLE" ]; then
-            echo "  - Z_AI_API_KEY: [SET - Available as fallback]"
+            echo "  - Z_AI_API_KEY: [SET - For Z.AI endpoint routing]"
           else
-            echo "  - Z_AI_API_KEY: [NOT SET]"
+            echo "  - Z_AI_API_KEY: [NOT SET - Optional for Z.AI routing]"
           fi
 
           echo ""
           echo "Environment variables configuration:"
-          echo "  - ANTHROPIC_API_KEY: Priority (ANTHROPIC_API_KEY || Z_AI_API_KEY)"
-          echo "  - Z_AI_API_KEY: Direct Z.AI API key"
+          echo "  - CLAUDE_CODE_OAUTH_TOKEN: Claude OAuth authentication"
+          echo "  - ANTHROPIC_AUTH_TOKEN: Z.AI API key for endpoint routing"
           echo "  - ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic"
           echo "  - API_TIMEOUT_MS: 3000000"
           echo "  - ANTHROPIC_DEFAULT_OPUS_MODEL: glm-4-7"
           echo "  - ANTHROPIC_DEFAULT_SONNET_MODEL: glm-4-7"
           echo "  - ANTHROPIC_DEFAULT_HAIKU_MODEL: glm-4-5-air"
           echo ""
-          echo "Ready to pass secrets to Claude action..."
+          echo "Authentication Strategy: Claude OAuth + Z.AI endpoint routing"
 
       - name: Test Z.AI API Key Format
         id: test-zai-key
@@ -267,11 +237,13 @@ jobs:
         timeout-minutes: 20
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Z.AI Authentication (per Z.AI documentation)
+          # Claude OAuth for authentication + Z.AI endpoint routing
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # Route to Z.AI endpoint with Z.AI API key as fallback
           ANTHROPIC_AUTH_TOKEN: ${{ secrets.Z_AI_API_KEY }}
           ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic
           API_TIMEOUT_MS: 3000000
-          # GLM Model Configuration
+          # GLM Model Configuration (Z.AI models)
           ANTHROPIC_DEFAULT_OPUS_MODEL: glm-4-7
           ANTHROPIC_DEFAULT_SONNET_MODEL: glm-4-7
           ANTHROPIC_DEFAULT_HAIKU_MODEL: glm-4-5-air
