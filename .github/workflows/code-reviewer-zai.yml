@@ -76,6 +76,70 @@ jobs:
           echo "Provide comprehensive code review following the structure and guidelines above." >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
+      - name: Validate Z.AI API Key & Environment
+        id: validate-env
+        run: |
+          echo "========================================="
+          echo "Z.AI ENVIRONMENT VALIDATION"
+          echo "========================================="
+
+          # Check if Z_AI_API_KEY secret exists
+          if [ -z "${{ secrets.Z_AI_API_KEY }}" ]; then
+            echo "[ERROR] Z_AI_API_KEY secret is NOT SET"
+            echo "Action: Go to Settings → Secrets and variables → Actions"
+            echo "Add secret: Name=Z_AI_API_KEY, Value=<your-z-ai-api-key>"
+            echo "Get API key from: https://z.ai/manage-apikey/apikey-list"
+            exit 1
+          else
+            echo "[SUCCESS] Z_AI_API_KEY secret found"
+            KEY_LENGTH=${#Z_AI_API_KEY}
+            echo "API Key length: ${KEY_LENGTH} characters"
+          fi
+
+          # Validate environment variables
+          echo ""
+          echo "========================================="
+          echo "ENVIRONMENT VARIABLES CHECK"
+          echo "========================================="
+          echo "ANTHROPIC_API_KEY: $([ -z '${{ secrets.Z_AI_API_KEY }}' ] && echo 'NOT SET' || echo 'SET (masked)')"
+          echo "ANTHROPIC_BASE_URL: ${{ env.BASE_URL }}"
+          echo "API_TIMEOUT_MS: ${{ env.TIMEOUT_MS }}"
+          echo ""
+          echo "GLM Model Configuration:"
+          echo "  Opus:   ${{ env.OPUS_MODEL }}"
+          echo "  Sonnet: ${{ env.SONNET_MODEL }}"
+          echo "  Haiku:  ${{ env.HAIKU_MODEL }}"
+
+          # Check if prompt file exists
+          echo ""
+          echo "========================================="
+          echo "FILE VALIDATION"
+          echo "========================================="
+          if [ -f ".github/code_reviewer_zai_prompt.md" ]; then
+            echo "[SUCCESS] code_reviewer_zai_prompt.md found"
+            echo "File size: $(wc -c < .github/code_reviewer_zai_prompt.md) bytes"
+          else
+            echo "[ERROR] code_reviewer_zai_prompt.md NOT FOUND"
+            exit 1
+          fi
+
+          echo ""
+          echo "========================================="
+          echo "SYSTEM INFO"
+          echo "========================================="
+          echo "Runner OS: ${{ runner.os }}"
+          echo "GitHub Event: ${{ github.event_name }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Repo: ${{ github.repository }}"
+
+        env:
+          BASE_URL: "https://api.z.ai/api/anthropic"
+          TIMEOUT_MS: "3000000"
+          OPUS_MODEL: "glm-4-7"
+          SONNET_MODEL: "glm-4-7"
+          HAIKU_MODEL: "glm-4-5-air"
+          Z_AI_API_KEY: ${{ secrets.Z_AI_API_KEY }}
+
       - name: Run Code Reviewer (Z.AI GLM)
         id: claude
         uses: anthropics/claude-code-action@beta
