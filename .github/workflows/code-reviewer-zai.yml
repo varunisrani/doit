@@ -83,17 +83,34 @@ jobs:
           echo "Z.AI ENVIRONMENT VALIDATION"
           echo "========================================="
 
-          # Check if Z_AI_API_KEY secret exists
-          if [ -z "${{ secrets.Z_AI_API_KEY }}" ]; then
-            echo "[ERROR] Z_AI_API_KEY secret is NOT SET"
-            echo "Action: Go to Settings → Secrets and variables → Actions"
-            echo "Add secret: Name=Z_AI_API_KEY, Value=<your-z-ai-api-key>"
-            echo "Get API key from: https://z.ai/manage-apikey/apikey-list"
+          # Store secret in a variable for checking
+          SECRET_VALUE="${{ secrets.Z_AI_API_KEY }}"
+
+          echo "Checking Z_AI_API_KEY secret..."
+          if [ -z "$SECRET_VALUE" ]; then
+            echo "[ERROR] Z_AI_API_KEY secret is EMPTY or NOT SET"
+            echo ""
+            echo "SOLUTION:"
+            echo "1. Go to: https://github.com/varunisrani/doit/settings/secrets/actions"
+            echo "2. Click 'New repository secret'"
+            echo "3. Name: Z_AI_API_KEY"
+            echo "4. Value: <your-api-key-from-https://z.ai/manage-apikey>"
+            echo "5. Click 'Add secret'"
+            echo ""
+            echo "After adding the secret, re-run the workflow."
             exit 1
           else
-            echo "[SUCCESS] Z_AI_API_KEY secret found"
-            KEY_LENGTH=${#Z_AI_API_KEY}
+            echo "[SUCCESS] Z_AI_API_KEY secret found!"
+            KEY_LENGTH=${#SECRET_VALUE}
             echo "API Key length: ${KEY_LENGTH} characters"
+            echo "API Key prefix: ${SECRET_VALUE:0:10}... (first 10 chars)"
+
+            # Check if it looks like a valid API key
+            if [[ $SECRET_VALUE == sk_* ]]; then
+              echo "API Key format: VALID (starts with sk_)"
+            else
+              echo "[WARNING] API Key might be invalid (doesn't start with 'sk_')"
+            fi
           fi
 
           # Validate environment variables
