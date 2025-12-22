@@ -148,8 +148,8 @@ jobs:
         env:
           BASE_URL: "https://api.z.ai/api/anthropic"
           TIMEOUT_MS: "3000000"
-          OPUS_MODEL: "glm-4-7"
-          SONNET_MODEL: "glm-4-7"
+          OPUS_MODEL: "glm-4.6"
+          SONNET_MODEL: "glm-4.6"
           HAIKU_MODEL: "glm-4-5-air"
           Z_AI_API_KEY: ${{ secrets.Z_AI_API_KEY }}
 
