@@ -205,7 +205,7 @@ export default function CanvasElement({ element, isSelected, zoom }: CanvasEleme
         outline: isSelected ? '2px solid var(--primary)' : 'none',
         outlineOffset: '2px',
         boxShadow: isSelected
-          ? '0 0 0 4px rgba(37, 99, 235, 0.1), 0 4px 12px rgba(0, 0, 0, 0.15)'
+          ? '0 0 0 4px rgba(220, 38, 38, 0.1), 0 4px 12px rgba(0, 0, 0, 0.15)'
           : element.locked
           ? '0 2px 8px rgba(0, 0, 0, 0.1)'
           : 'none',
@@ -241,7 +241,7 @@ export default function CanvasElement({ element, isSelected, zoom }: CanvasEleme
           style={{
             border: '1px solid var(--primary)',
             borderRadius: '2px',
-            backgroundColor: 'rgba(37, 99, 235, 0.02)',
+            backgroundColor: 'rgba(220, 38, 38, 0.02)',
           }}
         />
       )}

@@ -223,9 +223,9 @@ export const AVAILABLE_FONTS = [
   'Verdana',
 ] as const;
 
-// Shape Defaults
+// Shape Defaults - RED THEME
 export const DEFAULT_SHAPE_PROPERTIES = {
-  fillColor: '#3b82f6',
+  fillColor: '#dc2626',         // Red 600 - Updated to match red theme
   strokeColor: '#000000',
   strokeWidth: 2,
 } as const;
@@ -290,14 +290,14 @@ export const MAX_LAYER_ORDER = 9999;
 
 // Modern Design System Color Palette
 export const COLOR_PALETTE = {
-  // Brand Colors
-  primary: '#2563eb',           // Blue 600
-  primaryLight: '#3b82f6',      // Blue 500
-  primaryDark: '#1d4ed8',       // Blue 700
+  // Brand Colors - Red Theme
+  primary: '#dc2626',           // Red 600 - Main brand color
+  primaryLight: '#ef4444',      // Red 500 - Hover states
+  primaryDark: '#b91c1c',       // Red 700 - Active/pressed states
 
-  accent: '#7c3aed',            // Violet 600
-  accentLight: '#8b5cf6',       // Violet 500
-  accentDark: '#6d28d9',        // Violet 700
+  accent: '#f87171',            // Red 400 - Secondary accent
+  accentLight: '#fca5a5',       // Red 300 - Light accents
+  accentDark: '#dc2626',        // Red 600 - Dark accents
 
   // Semantic Colors
   success: '#059669',           // Emerald 600
@@ -316,11 +316,11 @@ export const COLOR_PALETTE = {
   infoLight: '#06b6d4',         // Cyan 500
   infoBg: '#ecfeff',            // Light cyan background
 
-  // Surface Colors - WHITE THEME
-  background: '#ffffff',        // Pure white background
-  surface: '#f8f9fa',           // Light gray surfaces
-  surfaceElevated: '#ffffff',   // White elevated surfaces
-  surfaceHover: '#f1f3f4',      // Light hover states
+  // Surface Colors - RED THEME
+  background: '#fefefe',        // Very subtle red-tinted white
+  surface: '#fdf2f2',           // Red 50 - Light red surface
+  surfaceElevated: '#ffffff',   // Pure white for elevation
+  surfaceHover: '#fef1f1',      // Slightly warmer hover state
 
   // Text Hierarchy - For white background
   textPrimary: '#1a1a1a',       // Near-black primary text
@@ -328,26 +328,26 @@ export const COLOR_PALETTE = {
   textTertiary: '#9aa0a6',      // Light gray tertiary/disabled text
   textInverse: '#ffffff',       // White text on colored backgrounds
 
-  // Border System
-  borderPrimary: '#e0e0e0',     // Light gray primary borders
-  borderSecondary: '#d1d5db',   // Slightly darker secondary borders
-  borderFocus: '#2563eb',       // Focus borders
-  borderError: '#dc2626',       // Error borders
+  // Border System - RED THEME
+  borderPrimary: '#fecaca',     // Red 200 - Light red borders
+  borderSecondary: '#f87171',   // Red 400 - Secondary borders
+  borderFocus: '#dc2626',       // Red focus borders
+  borderError: '#991b1b',       // Red 800 - Error borders
 
-  // Timeline Colors - WHITE THEME
-  timelineBg: '#f5f5f5',        // Very light gray timeline
-  timelineTrack: '#e8eaed',     // Light gray tracks
-  timelineTrackHover: '#dadce0', // Hover state for tracks
-  playhead: '#ef4444',
+  // Timeline Colors - RED THEME
+  timelineBg: '#fdf2f2',        // Light red background
+  timelineTrack: '#fecaca',     // Red 200 - Track background
+  timelineTrackHover: '#fca5a5', // Red 300 - Hover state
+  playhead: '#dc2626',          // Red 600 - Playhead
   rulerText: '#5f6368',
-  canvasBorder: '#e0e0e0',
+  canvasBorder: '#fecaca',      // Red 200 - Canvas border
 
-  // Track Type Colors (for timeline)
+  // Track Type Colors (for timeline) - RED THEME
   trackColors: [
-    '#3b82f6', // blue - video
+    '#dc2626', // red - video (updated to match red theme)
     '#10b981', // green - audio
     '#f59e0b', // orange - text
-    '#8b5cf6', // purple - effects
+    '#7c2d92', // purple with red undertone - effects
     '#ec4899', // pink - transitions
     '#06b6d4', // cyan - overlays
     '#ef4444', // red - markers
@@ -355,12 +355,12 @@ export const COLOR_PALETTE = {
   ],
 } as const;
 
-// Timeline Track Types
+// Timeline Track Types - RED THEME
 export const TRACK_TYPE_COLORS = {
-  video: '#3b82f6',      // Blue 500
+  video: '#dc2626',      // Red 600 - Updated to match red theme
   audio: '#10b981',      // Emerald 500
   text: '#f59e0b',       // Orange 500
-  effect: '#8b5cf6',     // Violet 500
+  effect: '#7c2d92',     // Purple with red undertone
   transition: '#ec4899', // Pink 500
   overlay: '#06b6d4',    // Cyan 500
   marker: '#ef4444',     // Red 500
