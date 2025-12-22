@@ -196,8 +196,8 @@ jobs:
           echo "  - ANTHROPIC_AUTH_TOKEN: Z.AI API key for endpoint routing"
           echo "  - ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic"
           echo "  - API_TIMEOUT_MS: 3000000"
-          echo "  - ANTHROPIC_DEFAULT_OPUS_MODEL: glm-4-7"
-          echo "  - ANTHROPIC_DEFAULT_SONNET_MODEL: glm-4-7"
+          echo "  - ANTHROPIC_DEFAULT_OPUS_MODEL: glm-4.7"
+          echo "  - ANTHROPIC_DEFAULT_SONNET_MODEL: glm-4.7"
           echo "  - ANTHROPIC_DEFAULT_HAIKU_MODEL: glm-4-5-air"
           echo ""
           echo "Authentication Strategy: Claude OAuth + Z.AI endpoint routing"
@@ -241,8 +241,8 @@ jobs:
           ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic
           API_TIMEOUT_MS: 3000000
           # GLM Model Configuration (Z.AI models)
-          ANTHROPIC_DEFAULT_OPUS_MODEL: glm-4-7
-          ANTHROPIC_DEFAULT_SONNET_MODEL: glm-4-7
+          ANTHROPIC_DEFAULT_OPUS_MODEL: glm-4.7
+          ANTHROPIC_DEFAULT_SONNET_MODEL: glm-4.7
           ANTHROPIC_DEFAULT_HAIKU_MODEL: glm-4-5-air
         with:
           # Claude OAuth authentication (passed via with, not env)
@@ -269,8 +269,8 @@ jobs:
           echo "  - ANTHROPIC_API_KEY: ${{ secrets.Z_AI_API_KEY }}"
           echo "  - ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic"
           echo "  - API_TIMEOUT_MS: 3000000"
-          echo "  - ANTHROPIC_DEFAULT_OPUS_MODEL: glm-4-7"
-          echo "  - ANTHROPIC_DEFAULT_SONNET_MODEL: glm-4-7"
+          echo "  - ANTHROPIC_DEFAULT_OPUS_MODEL: glm-4.7"
+          echo "  - ANTHROPIC_DEFAULT_SONNET_MODEL: glm-4.7"
           echo "  - ANTHROPIC_DEFAULT_HAIKU_MODEL: glm-4-5-air"
           echo ""
           echo "Troubleshooting Z.AI Integration:"
