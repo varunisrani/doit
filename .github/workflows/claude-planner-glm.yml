@@ -71,9 +71,7 @@ jobs:
           ANTHROPIC_DEFAULT_HAIKU_MODEL: glm-4-5-air
         with:
           # Claude OAuth for authentication
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          # Z.AI routing
-          ANTHROPIC_AUTH_TOKEN: ${{ secrets.Z_AI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.Z_AI_API_KEY }}
           # Custom trigger phrase for GLM planner
           trigger_phrase: "@claude-planner-glm"
           # Planner-specific instructions
