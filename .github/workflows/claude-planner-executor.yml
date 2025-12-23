@@ -1,4 +1,4 @@
-name: GLM Code Planner Executor (Z.AI)
+name: Claude Code Planner-Executor (Write Access)
 
 on:
   issue_comment:
@@ -7,7 +7,7 @@ on:
     types: [created]
 
 jobs:
-  glm-planner-executor:
+  claude-planner-executor:
     # Only trigger on @claude-planner-executor command from authorized users
     if: |
       (
@@ -32,7 +32,7 @@ jobs:
         with:
           fetch-depth: 0 # Full history for better context
 
-      - name: Load planner instructions
+      - name: Extract plan file path and load instructions
         id: load-instructions
         run: |
           # Get the issue or PR number from the event
@@ -42,8 +42,35 @@ jobs:
             ISSUE_NUMBER="${{ github.event.pull_request.number }}"
           fi
 
+          # Extract the plan file path from the comment
+          # Expected format: @claude-planner-executor path/to/plan.md
+          COMMENT_BODY="${{ github.event.comment.body }}"
+
+          # Extract file path after @claude-planner-executor
+          PLAN_FILE=$(echo "$COMMENT_BODY" | grep -oP '@claude-planner-executor\s+\K[^\s]+\.md' || echo "")
+
+          if [ -z "$PLAN_FILE" ]; then
+            echo "ERROR: No plan file specified. Usage: @claude-planner-executor path/to/plan.md"
+            echo "PLAN_FILE_ERROR=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Check if the plan file exists
+          if [ ! -f "$PLAN_FILE" ]; then
+            echo "ERROR: Plan file not found: $PLAN_FILE"
+            echo "PLAN_FILE_ERROR=true" >> $GITHUB_OUTPUT
+            echo "PLAN_FILE_PATH=$PLAN_FILE" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "PLAN_FILE_ERROR=false" >> $GITHUB_OUTPUT
+          echo "PLAN_FILE_PATH=$PLAN_FILE" >> $GITHUB_OUTPUT
+
+          # Read the plan file content
+          PLAN_CONTENT=$(cat "$PLAN_FILE")
+
           # Read the template and replace the AI_ASSISTANT placeholder
-          INSTRUCTIONS=$(cat .github/issue_fix_prompt.md | sed 's/{AI_ASSISTANT}/glm/g')
+          INSTRUCTIONS=$(cat .github/planner_executor_prompt.md | sed 's/{AI_ASSISTANT}/claude/g')
 
           # Use heredoc to preserve multiline content with context prepended
           echo "CUSTOM_INSTRUCTIONS<<EOF" >> $GITHUB_OUTPUT
@@ -51,94 +78,71 @@ jobs:
           echo "- Repository: ${{ github.repository }}" >> $GITHUB_OUTPUT
           echo "- Issue/PR Number: ${ISSUE_NUMBER}" >> $GITHUB_OUTPUT
           echo "- Triggered by: ${{ github.event.comment.user.login }}" >> $GITHUB_OUTPUT
-          echo "- Model: GLM-4.7 (Z.AI)" >> $GITHUB_OUTPUT
+          echo "- Plan File: ${PLAN_FILE}" >> $GITHUB_OUTPUT
           echo "" >> $GITHUB_OUTPUT
           echo "$INSTRUCTIONS" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "---" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "# PLAN TO EXECUTE" >> $GITHUB_OUTPUT
+          echo "**File: ${PLAN_FILE}**" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "$PLAN_CONTENT" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Validate API Credentials
-        id: validate-env
-        run: |
-          echo "========================================="
-          echo "API CREDENTIALS VALIDATION"
-          echo "========================================="
+      - name: Post error message if plan file not found
+        if: steps.load-instructions.outputs.PLAN_FILE_ERROR == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const planFile = '${{ steps.load-instructions.outputs.PLAN_FILE_PATH }}';
+            let errorMessage = '';
 
-          OAUTH_TOKEN="${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}"
-          Z_AI_SECRET="${{ secrets.Z_AI_API_KEY }}"
+            if (!planFile) {
+              errorMessage = `No plan file specified.\n\n**Usage:** \`@claude-planner-executor path/to/plan.md\`\n\nExample: \`@claude-planner-executor docs/implementation-plan.md\``;
+            } else {
+              errorMessage = `Plan file not found: \`${planFile}\`\n\nPlease ensure the file exists in the repository and the path is correct.`;
+            }
 
-          echo "Checking available credentials..."
-          echo ""
+            const comment = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `${errorMessage}`
+            };
 
-          if [ -z "$OAUTH_TOKEN" ]; then
-            echo "[WARNING] CLAUDE_CODE_OAUTH_TOKEN is NOT SET"
-          else
-            echo "[SUCCESS] CLAUDE_CODE_OAUTH_TOKEN is SET"
-          fi
+            if (context.eventName === 'issue_comment') {
+              await github.rest.issues.createComment({
+                ...comment,
+                issue_number: context.issue.number
+              });
+            } else if (context.eventName === 'pull_request_review_comment') {
+              await github.rest.pulls.createReplyForReviewComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+                comment_id: context.payload.comment.id,
+                body: comment.body
+              });
+            }
 
-          echo ""
-
-          if [ -z "$Z_AI_SECRET" ]; then
-            echo "[WARNING] Z_AI_API_KEY is NOT SET"
-          else
-            Z_KEY_LENGTH=${#Z_AI_SECRET}
-            echo "[SUCCESS] Z_AI_API_KEY is SET"
-            echo "  - Length: ${Z_KEY_LENGTH} characters"
-            echo "  - Format: Valid Z.AI format"
-          fi
-
-          echo ""
-          echo "Authentication Strategy:"
-          echo "  - Primary: CLAUDE_CODE_OAUTH_TOKEN (Claude OAuth)"
-          echo "  - Secondary: Z_AI_API_KEY (Z.AI GLM endpoint)"
-          echo "  - Models: GLM-4.7 (Planning), GLM-4.5-Air (Tools)"
-          echo ""
-          echo "========================================="
-
-      - name: Run GLM Code Planner Executor
-        id: glm-planner
+      - name: Run Claude Code Planner-Executor
+        if: steps.load-instructions.outputs.PLAN_FILE_ERROR == 'false'
+        id: claude
         uses: anthropics/claude-code-action@beta
-        timeout-minutes: 30
+        timeout-minutes: 60
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Z.AI GLM Configuration
-          ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic
-          API_TIMEOUT_MS: 3000000
-          # GLM Model Configuration
-          ANTHROPIC_DEFAULT_OPUS_MODEL: glm-4-7
-          ANTHROPIC_DEFAULT_SONNET_MODEL: glm-4-7
-          ANTHROPIC_DEFAULT_HAIKU_MODEL: glm-4-5-air
         with:
-          # Claude OAuth for authentication
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          # Z.AI routing
-          ANTHROPIC_AUTH_TOKEN: ${{ secrets.Z_AI_API_KEY }}
-          # Custom trigger phrase for executor workflow
+
+          # Custom trigger phrase for planner-executor workflow
           trigger_phrase: "@claude-planner-executor"
-          # Planner-specific instructions
+
+          # Planner-executor instructions loaded from template with plan content
           custom_instructions: ${{ steps.load-instructions.outputs.CUSTOM_INSTRUCTIONS }}
 
-      - name: Diagnostic Info on Failure
-        if: failure() && steps.glm-planner.outcome == 'failure'
-        run: |
-          echo "========================================="
-          echo "EXECUTOR FAILED - DIAGNOSTIC INFO"
-          echo "========================================="
-          echo ""
-          echo "Status:"
-          echo "  - Validation: ${{ steps.validate-env.outcome }}"
-          echo "  - Executor: ${{ steps.glm-planner.outcome }}"
-          echo ""
-          echo "Configuration:"
-          echo "  - Base URL: https://api.z.ai/api/anthropic"
-          echo "  - Models: GLM-4.7 (Opus/Sonnet), GLM-4.5-Air (Haiku)"
-          echo "  - Authentication: CLAUDE_CODE_OAUTH_TOKEN + Z_AI_API_KEY"
-          echo ""
-          echo "Troubleshooting:"
-          echo "  1. Verify CLAUDE_CODE_OAUTH_TOKEN is valid"
-          echo "  2. Verify Z_AI_API_KEY is active"
-          echo "  3. Check Z.AI service status at https://status.z.ai"
-          echo ""
-          echo "========================================="
+          # Commented out - using default tools
+          # allowed_tools: "Edit(*),MultiEdit(*),Write(*),Read(*),Grep(*),LS(*),Glob(*),TodoWrite(*),NotebookEdit(*),Bash(git *),Bash(npm *),Bash(uv *),Bash(python *),Bash(pip *),Bash(cd *),Bash(pwd),Bash(ls *),Bash(cat *),Bash(head *),Bash(tail *),Bash(wc *),Bash(find *),Bash(grep *),Bash(rg *),Bash(sed *),Bash(awk *),Bash(curl *),Bash(wget *),Bash(echo *),Bash(mkdir *),Bash(rm -rf node_modules),Bash(rm -rf __pycache__),Bash(rm -rf .pytest_cache),WebSearch(*),WebFetch(*)"
 
   unauthorized-message:
     # Post message for unauthorized users
@@ -164,7 +168,7 @@ jobs:
             const comment = {
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `❌ @${context.actor} - You are not authorized to trigger GLM planner executor.\n\nOnly maintainers can trigger this command. Please ask a maintainer to run the planner command.`
+              body: `@${context.actor} - You are not authorized to trigger Claude planner-executor.\n\nOnly maintainers can trigger Claude: Please ask a maintainer to run the planner-executor command.`
             };
 
             if (context.eventName === 'issue_comment') {
