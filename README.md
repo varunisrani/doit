@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Video Editor Pro
 
-## Getting Started
+Doit is a browser-based Next.js video-editor prototype with a compositing canvas, multitrack timeline, animation controls, and local project persistence.
 
-First, run the development server:
+## Core features
+
+- Project launcher with new, continue, and recent-project workflows.
+- Interactive 1920×1080-style canvas with selection, pan, zoom, text, and shape tools.
+- Multitrack timeline, playhead, clips, playback controls, and snapping utilities.
+- Properties, layers, media, analysis, and transitions panels.
+- Keyframe and easing utilities for animated element properties.
+- Undo/redo-oriented Zustand stores and keyboard-shortcut hooks.
+- Automatic browser-local project saving plus JSON project import/export.
+
+## Technology stack
+
+- Next.js 16, React 19, and TypeScript
+- Tailwind CSS 4
+- Zustand and Immer for client-side state
+- dnd-kit for drag-and-drop interactions
+- Lucide React icons
+- FFmpeg WebAssembly packages are declared as dependencies
+
+## Prerequisites
+
+- Node.js and npm
+- A modern browser with localStorage support
+
+## Local setup
 
 ```bash
+git clone https://github.com/varunisrani/doit.git
+cd doit
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Next.js uses `http://localhost:3000` by default. The editor is available at `/editor`; `/tools-demo` exposes a tools demonstration.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Production and lint commands:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm run start
+npm run lint
+```
 
-## Learn More
+## Configuration
 
-To learn more about Next.js, take a look at the following resources:
+No environment variables are referenced by the primary application source.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `app/page.tsx` — project launcher and recent-project list.
+- `app/editor/` — editor route.
+- `app/components/` — canvas, timeline, playback, tools, panels, layout, keyframes, modals, and UI primitives.
+- `app/hooks/` — canvas, selection, timeline, playback, keyboard, and autosave behavior.
+- `app/lib/` — state stores, storage, canvas math, effects, and timeline utilities.
+- `app/types/` and `app/constants/` — editor domain models and defaults.
+- `cyberpunk-analysis-2025-12-06-07-18-04/` — a separate checked-in design/implementation snapshot, not used by the root app.
 
-## Deploy on Vercel
+## Status and limitations
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This is a feature-rich prototype rather than a complete video-production tool. Projects are stored only in the current browser and large embedded assets are skipped by the persistence layer. The visible “Export Video” action currently logs to the console; the source does not connect the declared FFmpeg packages to a completed media-rendering workflow. Some keyboard actions are placeholders, and no automated test script is defined.
